@@ -2,3 +2,19 @@
 # Please follow the best practices: 
 # https://snakemake.readthedocs.io/en/stable/snakefiles/best_practices.html,
 # in particular regarding the standardized folder structure mentioned there. 
+
+rule all:
+    input:
+        "data/text2.txt"
+
+rule test_pipeline:
+    input:
+        "data/text.txt"
+    output:
+        "data/text2.txt"
+    shell:
+        """
+        sleep 60"
+        cp {input} {output}
+        """
+
