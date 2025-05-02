@@ -1,0 +1,4 @@
+executor: lsf
+jobs: 25
+default-resources:
+  lsf_queue: damrauer_normal
