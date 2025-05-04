@@ -9,12 +9,12 @@
 #BSUB -N                           # Send email at job end
 
 # 1. Create the array of input files
-myArray=($(ls -1 /data/raw/gwas-summary-statistics/*.txt))
+cd /project/damrauer_wachtel/Hernia-PRS
 
 # 2. Select the file for this job index
+myArray=($(ls -1 data/raw/gwas-summary-statistics/*.txt))
 input_file="${myArray[${LSB_JOBINDEX} - 1]}"
 
 # 3. Run your R script with the selected input
 module load R/4.3
-cd /project/damrauer_wachtel/Hernia-PRS
-Rscript /workflow/rules/scripts/input/process_gwas.R "${input_file}"
+Rscript workflow/rules/scripts/input/process_gwas.R "${input_file}"
