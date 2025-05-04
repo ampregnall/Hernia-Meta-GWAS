@@ -5,7 +5,6 @@
 #BSUB -n 1                         # Number of cores
 #BSUB -R "rusage[mem=20GB]"        # Memory requirement (adjust as needed)
 #BSUB -W 1:00                      # Runtime limit (hh:mm)
-#BSUB -B                           # Send email at job start
 #BSUB -N                           # Send email at job end
 
 # 1. Create the array of input files
