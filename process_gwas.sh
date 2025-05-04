@@ -1,7 +1,6 @@
 #!/bin/bash
 #BSUB -J process_gwas[1-55]        # Job name and array index
 #BSUB -o logs/process_gwas_%I.out  # Standard output
-#BSUB -q damrauer_normal           # Set queue name
 #BSUB -e logs/process_gwas_%I.err  # Standard error
 #BSUB -n 1                         # Number of cores
 #BSUB -R "rusage[mem=20GB]"        # Memory requirement (adjust as needed)
