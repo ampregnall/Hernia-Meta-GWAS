@@ -9,11 +9,12 @@ source("workflow/rules/scripts/input/process_gwas_utils.R")
 # Command line input
 args <- commandArgs(trailingOnly = TRUE)
 input_file <- args[1]
+outfile <- basename(input_file)
 study <- stringr::word(basename(input_file), 1, sep = "_")
 print(input_file)
 
 # Load data
-df <- fread(input_file) %>% lazy_dt()
+df <- fread(input_file)
 
 if (study == "Pan-UKBB") {
   df <- process_ukbb(df)
@@ -26,5 +27,5 @@ if (study == "Pan-UKBB") {
 }
 
 # Save data
-output_file <- paste0("data/processed/gwas-summary-statistics/", study)
+output_file <- paste0("data/processed/gwas-summary-statistics/", outfile)
 fwrite(df, output_file, sep = "\t")
