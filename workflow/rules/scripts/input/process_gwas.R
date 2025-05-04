@@ -4,7 +4,7 @@ library(dplyr)
 library(stringr)
 library(data.table)
 library(dtplyr)
-source("/workflow/rules/scripts/process_gwas_utils.R")
+source("/workflow/rules/scripts/input/process_gwas_utils.R")
 
 # Command line input
 args <- commandArgs(trailingOnly = TRUE)
