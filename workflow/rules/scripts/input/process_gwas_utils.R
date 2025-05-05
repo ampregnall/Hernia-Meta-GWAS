@@ -4,6 +4,9 @@ library(dtplyr)
 library(magrittr)
 library(tidyr)
 library(dplyr)
+library(stringr)
+#BiocManager::install("rtracklayer")
+library(rtracklayer)
 
 process_ukbb <- function(df) {
   df <- df %>%
@@ -51,4 +54,30 @@ process_aou <- function(df) {
   
   return(df)
 
+}
+
+liftover_37_to_38 <- function(df) {
+  gr <- GRanges(
+    seqnames = df$chr,
+    ranges = IRanges(start = df$pos - 1, end = df$pos),
+    strand = "*",
+    ref = df$ref,
+    alt = df$alt,
+    beta = df$beta,
+    se = df$beta,
+    pvalue = df$pvalue
+  )
+  
+  seqlevelsStyle(gr) <- 'UCSC'
+  chain <- import.chain("data/meta/liftover/hg19ToHg38.over.chain")
+  gr_lifted <- unlist(liftOver(gr, chain))
+  
+  result <- data.frame(chr = as.character(seqnames(gr_lifted)), 
+                       pos = start(gr_lifted) + 1,
+                       mcols(gr_lifted))
+  
+  result$chr <- str_remove(result$chr, "chr")
+  
+  return(result)
+  
 }
