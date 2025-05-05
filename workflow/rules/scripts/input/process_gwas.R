@@ -10,8 +10,9 @@ source("workflow/rules/scripts/input/process_gwas_utils.R")
 args <- commandArgs(trailingOnly = TRUE)
 input_file <- args[1]
 outfile <- basename(input_file)
-study <- stringr::word(basename(input_file), 1, sep = "_")
-print(input_file)
+study <- word(basename(input_file), 1, sep = "_")
+genome <- word(basename(input_file), 4, sep = "_")
+genome <- str_remove(genome, ".txt")
 
 # Load data
 df <- fread(input_file)
@@ -24,6 +25,11 @@ if (study == "Pan-UKBB") {
   df <- process_aou(df)
 } else if (study == "MVP") {
   df <- process_mvp(df)
+}
+
+if (genome == "GrCh37") {
+  df <- liftover_37_to_38(df)
+  outfile <- paste0(str_remove(outfile, "GrCh37.txt"), "GrCh38.txt")
 }
 
 # Save data
