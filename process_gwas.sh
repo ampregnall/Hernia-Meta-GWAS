@@ -1,9 +1,9 @@
 #!/bin/bash
-#BSUB -J process_gwas[1-55]        # Job name and array index
+#BSUB -J process_gwas[1-61]        # Job name and array index
 #BSUB -o logs/process_gwas_%I.out  # Standard output
 #BSUB -e logs/process_gwas_%I.err  # Standard error
 #BSUB -n 1                         # Number of cores
-#BSUB -R "rusage[mem=30GB]"        # Memory requirement (adjust as needed)
+#BSUB -R "rusage[mem=32GB]"        # Memory requirement (adjust as needed)
 #BSUB -W 1:00                      # Runtime limit (hh:mm)
 #BSUB -N                           # Send email at job end
 
