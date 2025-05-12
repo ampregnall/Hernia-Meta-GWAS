@@ -1,83 +1,91 @@
 # Load libraries
-library(data.table)
-library(dtplyr)
 library(magrittr)
-library(tidyr)
-library(dplyr)
-library(stringr)
-#BiocManager::install("rtracklayer")
-library(rtracklayer)
 
-process_ukbb <- function(df) {
+liftover_37_to_38 <- function(df, chainfile) {
+  
   df <- df %>%
-    rename(beta = 7, se = 8, neglog10pval = 9) %>%
-    mutate(pvalue = 10^(-1*neglog10pval)) %>%
-    select(chr, pos, ref, alt, beta, se, pvalue) %>%
-    drop_na() %>%
-    as_tibble()
+    dplyr::mutate(chr = glue::glue("chr{chr}")) %>%
+    dplyr::mutate(start = pos, end = start) %>%
+    GenomicRanges::makeGRangesFromDataFrame(keep.extra.columns = TRUE, starts.in.df.are.0based = FALSE) %>%
+    rtracklayer::liftOver(., rtracklayer::import.chain(chainfile)) %>%
+    tidyr::as_tibble()
   
   return(df)
   
 }
 
-process_mvp <- function(df) {
+process_ukbb <- function(df, n_case, n_control) {
+  
+  df <- df %>%
+    dplyr::mutate(CHROM = as.numeric(stringr::str_replace(seqnames, "chr", ""))) %>%
+    dplyr::mutate(N_CASE = n_case, N_CONTROL = n_control) %>%
+    dplyr::mutate(N = N_CASE + N_CONTROL) %>%
+    dplyr::rename(POS = pos, BETA = dplyr::starts_with("beta"), 
+                  SE = dplyr::starts_with("se_"), 
+                  neglog10pval = dplyr::starts_with("neglog10"),
+                  af_cases = dplyr::starts_with("af_cases"),
+                  af_controls = dplyr::starts_with("af_controls"),
+                  EFFECT_ALLELE = alt, OTHER_ALLELE = ref) %>%
+    dplyr::mutate(EAF = (N_CASE*af_cases + N_CONTROL*af_controls)/(N)) %>%
+    dplyr::mutate(P = 10^(-1*neglog10pval)) %>%
+    dplyr::select(CHROM, POS, EFFECT_ALLELE, OTHER_ALLELE, EAF, BETA, SE, P, N_CASE, N_CONTROL, N) %>%
+    tidyr::drop_na() %>%
+    dplyr::mutate(MARKER = glue::glue("{CHROM}_{POS}")) %>%
+    dplyr::select(MARKER, everything()) %>%
+    tidyr::as_tibble()
+  
+    return(df)
+  
+}
+
+process_mvp <- function(df, n_case, n_control) {
+  
   df <- df %>% 
-    separate_wider_delim(cols = ci, delim = ",", names = c("ci_low", "ci_high")) %>%
-    mutate(beta = log(or), se = (as.numeric(ci_high) - or) / 1.96) %>%
-    select(chrom, pos, ref, alt, beta, se, pval) %>%
-    drop_na() %>%
-    rename(chr = chrom, pvalue = pval) %>%
-    as_tibble()
+    dplyr::mutate(BETA = log(or), SE = abs(BETA / qnorm(pval / 2))) %>%
+    dplyr::mutate(N_CASE = n_case,N_CONTROL = n_control) %>%
+    dplyr::mutate(N = N_CASE + N_CONTROL) %>%
+    dplyr::rename(CHROM = chrom, POS = pos, EFFECT_ALLELE = ea, 
+                  OTHER_ALLELE = ref, EAF = af, P = pval) %>%
+    dplyr::select(CHROM, POS, EFFECT_ALLELE, OTHER_ALLELE, 
+                  EAF, BETA, SE, P, N_CASE, N_CONTROL, N) %>%
+    tidyr::drop_na() %>%
+    dplyr::mutate(MARKER = glue::glue("{CHROM}_{POS}")) %>%
+    dplyr::select(MARKER, everything()) %>%
+    tidyr::as_tibble()
   
   return(df)
       
 }
 
-process_finngen <- function(df) {
+process_finngen <- function(df, n_case, n_control) {
   df <- df %>%
-    select(`#chrom`, pos, ref, alt, beta, sebeta, pval) %>%
-    drop_na() %>%
-    rename(chr = `#chrom`, se = sebeta, pvalue = pval) %>%
-    as_tibble()
+    dplyr::mutate(N_CASE = n_case, N_CONTROL = n_control) %>%
+    dplyr::mutate(N = N_CASE + N_CONTROL) %>%
+    dplyr::select(`#chrom`, pos, alt, ref, af_alt, beta, sebeta, pval, N_CASE, N_CONTROL, N) %>%
+    tidyr::drop_na() %>%
+    dplyr::rename(CHROM = `#chrom`, POS = pos, EFFECT_ALLELE = alt, OTHER_ALLELE = ref, 
+                  EAF = af_alt, BETA = beta, SE = sebeta, P = pval) %>%
+    dplyr::mutate(MARKER = glue::glue("{CHROM}_{POS}")) %>%
+    dplyr::select(MARKER, everything()) %>%
+    tidyr::as_tibble()
   
   return(df)
   
 }
 
-process_aou <- function(df) {
+process_aou <- function(df, n_case, n_control) {
   
   df <- df %>%
-    select(CHR, POS, Allele1, Allele2, BETA, SE, Pvalue) %>%
-    drop_na() %>%
-    rename(chr = CHR, pos = POS, ref = Allele1, alt = Allele2, beta = BETA, se = SE, pvalue = Pvalue) %>%
-    as_tibble()
+    dplyr::mutate(N_CASE = n_case, N_CONTROL = n_control) %>%
+    dplyr::mutate(N = N_CASE + N_CONTROL) %>%
+    dplyr::mutate(CHROM = as.numeric(stringr::str_replace(CHR, "chr", ""))) %>%
+    dplyr::rename(EFFECT_ALLELE = Allele2, OTHER_ALLELE = Allele1, EAF = AF_Allele2, P = Pvalue) %>%
+    dplyr::select(CHROM, POS, EFFECT_ALLELE, OTHER_ALLELE, EAF, BETA, SE, P, N_CASE, N_CONTROL, N) %>%
+    tidyr::drop_na() %>%
+    dplyr::mutate(MARKER = glue::glue("{CHROM}_{POS}")) %>%
+    dplyr::select(MARKER, everything()) %>%
+    tidyr::as_tibble()
   
   return(df)
 
-}
-
-liftover_37_to_38 <- function(df) {
-  gr <- GRanges(
-    seqnames = df$chr,
-    ranges = IRanges(start = df$pos - 1, end = df$pos),
-    strand = "*",
-    ref = df$ref,
-    alt = df$alt,
-    beta = df$beta,
-    se = df$beta,
-    pvalue = df$pvalue
-  )
-  
-  seqlevelsStyle(gr) <- 'UCSC'
-  chain <- import.chain("data/meta/liftover/hg19ToHg38.over.chain")
-  gr_lifted <- unlist(liftOver(gr, chain))
-  
-  result <- data.frame(chr = as.character(seqnames(gr_lifted)), 
-                       pos = start(gr_lifted) + 1,
-                       mcols(gr_lifted))
-  
-  result$chr <- str_remove(result$chr, "chr")
-  
-  return(result)
-  
 }
