@@ -14,7 +14,7 @@ rule test_pipeline:
         "data/text2.txt"
     shell:
         """
-        sleep 60"
+        sleep 60
         cp {input} {output}
         """
 
