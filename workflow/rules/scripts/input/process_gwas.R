@@ -3,7 +3,7 @@ library(readr)
 library(dplyr)
 library(data.table)
 source("workflow/rules/scripts/input/process_gwas_utils.R")
-chainfile <- "data/meta/liftover/hg19ToHg38.over.chain"
+chainfile <- "/project/voltron/Resources/liftOver/hg19ToHg38.over.chain"
 
 # Command line input
 args <- commandArgs(trailingOnly = TRUE)
