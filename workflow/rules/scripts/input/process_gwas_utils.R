@@ -20,7 +20,7 @@ process_ukbb <- function(df, n_case, n_control) {
     dplyr::mutate(CHROM = as.numeric(stringr::str_replace(seqnames, "chr", ""))) %>%
     dplyr::mutate(N_CASE = n_case, N_CONTROL = n_control) %>%
     dplyr::mutate(N = N_CASE + N_CONTROL) %>%
-    dplyr::rename(POS = pos, BETA = dplyr::starts_with("beta"), 
+    dplyr::rename(POS = start, BETA = dplyr::starts_with("beta"), 
                   SE = dplyr::starts_with("se_"), 
                   neglog10pval = dplyr::starts_with("neglog10"),
                   af_cases = dplyr::starts_with("af_cases"),
