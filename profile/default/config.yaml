@@ -1,4 +1,4 @@
 executor: lsf
-jobs: 25
+jobs: 100
 default-resources:
-  lsf_queue: damrauer_normal
+  lsf_queue: voltron_normal
