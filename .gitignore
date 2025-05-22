@@ -1,5 +1,6 @@
 results/**
 resources/**
+documents/** 
 logs/**
 data/**
 .snakemake
