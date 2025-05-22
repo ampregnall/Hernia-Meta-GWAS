@@ -1,20 +1,20 @@
-# Main entrypoint of the workflow. 
-# Please follow the best practices: 
-# https://snakemake.readthedocs.io/en/stable/snakefiles/best_practices.html,
-# in particular regarding the standardized folder structure mentioned there. 
+# # --------------
+# # Configuration
+# # --------------
+from pathlib import Path
+import pandas as pd
+import yaml
+
+configfile: "config/config.yaml"
+
+include: "rules/input.smk"
+
+def get_input(wc):
+    df = pd.read_table("config/studies.txt")
+    #cols = ['study', 'pheno', 'ancestry']
+    files = df.apply(lambda x: f'data/processed/gwas-summary-statistics/{x["study"]}_{x["phenotype"]}_{x["population"]}_GrCh38.txt', axis = 1).tolist()    
+    return files
 
 rule all:
     input:
-        "data/text2.txt"
-
-rule test_pipeline:
-    input:
-        "data/text.txt"
-    output:
-        "data/text2.txt"
-    shell:
-        """
-        sleep 60
-        cp {input} {output}
-        """
-
+        get_input
