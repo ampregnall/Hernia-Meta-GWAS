@@ -5,3 +5,5 @@ logs/**
 data/**
 .snakemake
 .snakemake/**
+*.Rhistory
+*.DS_Store
