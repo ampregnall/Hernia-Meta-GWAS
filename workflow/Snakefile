@@ -11,7 +11,6 @@ include: "rules/input.smk"
 
 def get_input(wc):
     df = pd.read_table("config/studies.txt")
-    #cols = ['study', 'pheno', 'ancestry']
     files = df.apply(lambda x: f'data/processed/gwas-summary-statistics/{x["study"]}_{x["phenotype"]}_{x["population"]}_GrCh38.txt', axis = 1).tolist()    
     return files
 
