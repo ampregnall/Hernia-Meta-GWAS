@@ -1,2 +1,3 @@
 process_gwas:
   utils: "workflow/rules/scripts/inputs/process_gwas_utils.R"
+  chainfile: "data/meta/liftover/hg19ToHg38.over.chain"
