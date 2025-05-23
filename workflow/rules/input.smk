@@ -12,8 +12,8 @@ rule process_gwas_sumstats:
     params:
         genome = lambda wildcards: metadata[wildcards.id]["genome"],
         study = lambda wildcards: metadata[wildcards.id]["study"],
-        n_cases = lambda wildcards: metadata[wildcards.id]["n_cases"],
-        n_controls = lambda wildcards: metadata[wildcards.id]["n_controls"],
+        n_cases = lambda wildcards: metadata[wildcards.id]["cases"],
+        n_controls = lambda wildcards: metadata[wildcards.id]["controls"],
         utils = config["process_gwas"]["utils"],
         chainfile = config["process_gwas"]["chainfile"],
     script:
