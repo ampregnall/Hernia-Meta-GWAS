@@ -17,4 +17,4 @@ rule process_gwas_sumstats:
         utils = config["process_gwas"]["utils"],
         chainfile = config["process_gwas"]["chainfile"],
     script:
-        "workflow/rules/scripts/input/process_gwas.R"
+        "scripts/input/process_gwas.R"
