@@ -1,38 +1,30 @@
+# Retrieve Snakemake objects
+input <- snakemake@input[[1]]
+output <- snakemake@output[[1]]
+utils <- snakemake@params[["utils"]]
+chainfile <- snakemake@params[["chainfile"]]
+study <- snakemake@params[["study"]]
+genome <- snakemake@params[["genome"]]
+n_cases <- snakemake@params[["n_cases"]]
+n_controls <- snakemake@params[["n_controls"]]
+
 # Load required libraries
 library(readr)
 library(dplyr)
 library(data.table)
-source("workflow/rules/scripts/input/process_gwas_utils.R")
-chainfile <- "/project/voltron/Resources/liftOver/hg19ToHg38.over.chain"
 
-# Command line input
-args <- commandArgs(trailingOnly = TRUE)
-input_file <- args[1]
-
-# Extract study parameters
-study <- stringr::word(basename(input_file), 1, sep = "_")
-phenotype <- stringr::word(basename(input_file), 2, sep = "_")
-ancestry <- stringr::word(basename(input_file), 3, sep = "_")
-genome <- stringr::word(basename(input_file), 4, sep = "_")
-genome <- stringr::str_remove(genome, ".txt")
-outfile <- basename(input_file)
-
-# Load metadata
-meta <- readxl::read_xlsx("data/meta/studies/hernia_gwas_summary_stats.xlsx", sheet = "data") %>% 
-  filter(Study == study & Phenotype == phenotype & Population == ancestry)
-
-# Get number of cases and control
-n_cases = meta$Cases
-n_controls = meta$Controls
+# Load custom functions
+source(utils)
 
 # Load summary statistics
-df <- fread(input_file)
+df <- fread(input)
 
+# Perform liftover on relevant files
 if (genome == "GrCh37") {
   df <- liftover_37_to_38(df, chainfile)
-  outfile <- paste0(stringr::str_remove(outfile, "GrCh37.txt"), "GrCh38.txt")
 }
 
+# Process studies
 if (study == "Pan-UKBB") {
   df <- process_ukbb(df, n_cases, n_controls)
 } else if (study == "FinnGen-R12") {
@@ -44,5 +36,4 @@ if (study == "Pan-UKBB") {
 }
 
 # Save data
-output_file <- paste0("data/processed/gwas-summary-statistics/", outfile)
-fwrite(df, output_file, sep = "\t")
+fwrite(df, output, sep = "\t")
