@@ -1,5 +1,5 @@
 # Retrieve Snakemake objects
-input <- snakemake@input
+input <- snakemake@input[[1]]
 output <- snakemake@output
 utils <- snakemake@params[["utils"]]
 chainfile <- snakemake@params[["chainfile"]]
@@ -12,8 +12,6 @@ n_controls <- snakemake@params[["n_controls"]]
 library(readr)
 library(dplyr)
 library(data.table)
-
-getwd()
 
 # Load custom functions
 source(utils)
