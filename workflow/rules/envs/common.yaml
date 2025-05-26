@@ -1,0 +1,15 @@
+name: common
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - r-base=4.3
+  - r-tidyverse
+  - r-data.table
+  - r-devtools
+  - r-xml
+  - r-curl
+  - r-jsonlite
+  - pip
+  - bioconductor-rtracklayer
+  - bioconductor-genomicranges
