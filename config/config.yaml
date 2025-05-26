@@ -1,3 +1,7 @@
 process_gwas:
   utils: "workflow/rules/scripts/input/process_gwas_utils.R"
   chainfile: "data/meta/liftover/hg19ToHg38.over.chain"
+
+munge_sumstats:
+  alleles: "/project/voltron/Resources/LDSC/w_hm3.snplist"
+  chunksize: 500000
