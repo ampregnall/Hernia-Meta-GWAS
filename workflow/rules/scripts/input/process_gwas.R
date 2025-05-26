@@ -1,6 +1,6 @@
 # Retrieve Snakemake objects
 input <- snakemake@input[[1]]
-output <- snakemake@output
+output <- snakemake@output[[1]]
 utils <- snakemake@params[["utils"]]
 chainfile <- snakemake@params[["chainfile"]]
 study <- snakemake@params[["study"]]
