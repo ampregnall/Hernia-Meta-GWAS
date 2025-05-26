@@ -15,7 +15,7 @@ def get_input(wc):
     files = df.apply(lambda x: f'data/processed/gwas-summary-statistics/{x["study"]}_{x["phenotype"]}_{x["population"]}.txt', axis = 1).tolist()    
     return files
 
-def get_munge():
+def get_munge(wc):
     df = pd.read_table("config/studies.txt")
     files = df.apply(lambda x: f'data/processed/ldsc-summary-statistics/{x["study"]}_{x["phenotype"]}_{x["population"]}_LDSC.txt', axis = 1).tolist()    
     return files
