@@ -2,3 +2,6 @@ executor: lsf
 jobs: 100
 default-resources:
   lsf_queue: voltron_normal
+  lsf_project: Hernia-Meta-GWAS
+  walltime: 12:00:00
+  mem_mb: 32000
