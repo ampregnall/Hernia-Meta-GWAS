@@ -1,17 +1,19 @@
 # Retrieve Snakemake objects
 input <- snakemake@input
 output <- snakemake@output
-utils <- snakemake@params[['utils']]
-chainfile <- snakemake@params[['chainfile']]
-study <- snakemake@params[['study']]
-genome <- snakemake@params[['genome']]
-n_cases <- snakemake@params[['n_cases']]
-n_controls <- snakemake@params[['n_controls']]
+utils <- snakemake@params[["utils"]]
+chainfile <- snakemake@params[["chainfile"]]
+study <- snakemake@params[["study"]]
+genome <- snakemake@params[["genome"]]
+n_cases <- snakemake@params[["n_cases"]]
+n_controls <- snakemake@params[["n_controls"]]
 
 # Load required libraries
 library(readr)
 library(dplyr)
 library(data.table)
+
+getwd()
 
 # Load custom functions
 source(utils)
