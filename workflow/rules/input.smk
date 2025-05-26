@@ -15,6 +15,8 @@ rule process_gwas_sumstats:
         n_cases = lambda wildcards: metadata[wildcards.id]["cases"],
         n_controls = lambda wildcards: metadata[wildcards.id]["controls"],
         utils = config["process_gwas"]["utils"],
-        chainfile = config["process_gwas"]["chainfile"],
+        chainfile = config["process_gwas"]["chainfile"]
+    conda:
+        "envs/common.yaml"
     script:
         "scripts/input/process_gwas.R"
