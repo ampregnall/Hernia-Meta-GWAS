@@ -10,7 +10,7 @@ rule munge_sumstats:
         "envs/ldsc.yaml"
     shell:
         """
-        python workflow/scripts/ldsc/munge_sumstats.py \
+        python workflow/rules/scripts/ldsc/munge_sumstats.py \
             --sumstats {input} \
             --out {output} \
             --merge-alleles {params.alleles} \
