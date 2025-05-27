@@ -12,4 +12,4 @@ source activate snakemake2
 
 cd /project/damrauer_wachtel/Hernia-PRS
 
-snakemake --use-conda --profile profile/default
+snakemake --use-conda --rerun-triggers mtime --profile profile/default
