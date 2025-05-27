@@ -8,6 +8,10 @@ rule munge_sumstats:
         chunksize = config["munge_sumstats"]["chunksize"]
     conda:
         "envs/ldsc.yaml"
+    resources:
+        mem_mb = 8000,
+        threads = 1,
+        walltime = 2:00:00
     shell:
         """
         python workflow/rules/scripts/ldsc/munge_sumstats.py \
