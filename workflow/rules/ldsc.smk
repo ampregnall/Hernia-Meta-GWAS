@@ -1,22 +1,25 @@
-rule munge_sumstats:
+# Load metadata
+df = pd.read_table("config/studies.txt")
+df["id"] = df.apply(lambda row: f"{row.study}_{row.phenotype}_{row.population}", axis=1)
+df["ldsc"] = df.apply(lambda row: f"data/meta/gwaslab-references/ldsc/{row.population}/UKBB.{row.population}")
+metadata = {row.id: row._asdict() for row in df.itertuples(index=False)}
+ids = list(metadata.keys())
+
+rule ldsc_correction:
     input:
         "data/processed/gwas-summary-statistics/{id}.txt"
     output:
-        "data/processed/ldsc-summary-statistics/{id}_LDSC.txt"
+        sumstats = "data/processed/sumstats-ldsc-corrected/{id}_LDSC.txt",
+        ldsc = "data/processed/ldsc-stats/{id}.txt"
     params:
-        alleles = lambda wildcards: config["munge_sumstats"]["alleles"],
-        chunksize = config["munge_sumstats"]["chunksize"]
+        rsid_tsv = config["ldsc_correction"]["rsid_tsv"],
+        rsid_vcf = config["ldsc_correction"]["rsid_vcf"],
+        ldsc_scores = lambda wildcards : metadata[wildcards.id]["ldsc"]
     conda:
-        "envs/ldsc.yaml"
-    threads: 1
+        "envs/gwaslab.yaml"
+    threads: 2
     resources:
-        mem_mb = 8000,
+        mem_mb = 16000
         walltime = 120
-    shell:
-        """
-        python workflow/rules/scripts/ldsc/munge_sumstats.py \
-            --sumstats {input} \
-            --out {output} \
-            --merge-alleles {params.alleles} \
-            --chunksize {params.chunksize}
-        """
+    script:
+        "scripts/ldsc/ldsc_correction.py"
