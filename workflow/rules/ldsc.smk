@@ -19,7 +19,7 @@ rule ldsc_correction:
         "envs/gwaslab.yaml"
     threads: 2
     resources:
-        mem_mb = 16000
+        mem_mb = 16000,
         walltime = 120
     script:
         "scripts/ldsc/ldsc_correction.py"
