@@ -2,6 +2,6 @@ process_gwas:
   utils: "workflow/rules/scripts/input/process_gwas_utils.R"
   chainfile: "data/meta/liftover/hg19ToHg38.over.chain"
 
-munge_sumstats:
-  alleles: "/project/voltron/Resources/LDSC/w_hm3.snplist"
-  chunksize: 500000
+ldsc_correction:
+  1000kg: "data/meta/gwaslab-references/assign-rsid/1kg_dbsnp151_hg38_auto.txt.gz"
+  DBSNP: "data/meta/gwaslab-references/assign-rsid/GCF_000001405.40.gz"
