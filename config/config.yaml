@@ -3,5 +3,5 @@ process_gwas:
   chainfile: "data/meta/liftover/hg19ToHg38.over.chain"
 
 ldsc_correction:
-  1000kg: "data/meta/gwaslab-references/assign-rsid/1kg_dbsnp151_hg38_auto.txt.gz"
-  DBSNP: "data/meta/gwaslab-references/assign-rsid/GCF_000001405.40.gz"
+  rsid_tsv: "data/meta/gwaslab-references/assign-rsid/1kg_dbsnp151_hg38_auto.txt.gz"
+  rsid_vcf: "data/meta/gwaslab-references/assign-rsid/GCF_000001405.40.gz"
