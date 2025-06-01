@@ -16,7 +16,7 @@ rule ldsc_correction:
         rsid_vcf = config["ldsc_correction"]["rsid_vcf"],
         ldsc_scores = lambda wildcards : metadata[wildcards.id]["ldsc"]
     conda:
-        "envs/gwaslab.yaml"
+        "gwaslab"
     threads: 2
     resources:
         mem_mb = 16000,
