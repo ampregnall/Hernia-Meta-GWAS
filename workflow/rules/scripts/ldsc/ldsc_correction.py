@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from scipy.stats import norm
 
-ss = gl.Sumstats(snakemake.input,
+ss = gl.Sumstats(snakemake.input[0],
              snpid="MARKER",
              chrom="CHROM",
              pos="POS",
@@ -20,16 +20,16 @@ ss = gl.Sumstats(snakemake.input,
              sep="\t", 
              verbose=True)
 
-ss.data['SNPID'] = ss.data[['CHR', "POS", "NEA", "EA"]].astype(str).agg(':'.join, axis=1)
+# ss.data['SNPID'] = ss.data[['CHR', "POS", "NEA", "EA"]].astype(str).agg(':'.join, axis=1)
 
-ss.assign_rsid(ref_rsid_tsv = snakemake.params.rsid_tsv,
-               ref_rsid_vcf = snakemake.params.rsid_vcf,
+ss.assign_rsid(ref_rsid_tsv = snakemake.params["rsid_tsv"],
+               ref_rsid_vcf = snakemake.params["rsid_vcf"],
                chr_dict = gl.get_number_to_NC(build="38"), 
                n_cores = snakemake.threads)
 
 ss_fil = ss.filter_hapmap3(inplace=False)
 
-ss_fil.estimate_h2_by_ldsc(ref_ld = snakemake.params.ldsc_scores,  w_ld = snakemake.param.ldsc_scores)
+ss_fil.estimate_h2_by_ldsc(ref_ld = snakemake.params["ldsc_scores"],  w_ld = snakemake.params["ldsc_scores"])
 
 
 if np.float64(ss_fil.ldsc_h2['Intercept'][0]) > 1:
@@ -38,5 +38,5 @@ if np.float64(ss_fil.ldsc_h2['Intercept'][0]) > 1:
     ss.data['P'] = 2 * norm.sf(abs(ss.data['Z']))
 
 # Save results
-ss.data.to_csv(snakemake.output.sumstats, sep="\t", index=False)
-ss_fil.ldsc_h2(snakemake.output.ldsc, sep="\t", index=False)
+ss.data.to_csv(snakemake.output["sumstats"], sep="\t", index=False)
+ss_fil.ldsc_h2.to_csv(snakemake.output["ldsc"], sep="\t", index=False)
