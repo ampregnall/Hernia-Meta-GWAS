@@ -23,14 +23,12 @@ process_ukbb <- function(df, n_case, n_control) {
     dplyr::rename(POS = start, BETA = dplyr::starts_with("beta"), 
                   SE = dplyr::starts_with("se_"), 
                   neglog10pval = dplyr::starts_with("neglog10"),
-                  af_cases = dplyr::starts_with("af_cases"),
-                  af_controls = dplyr::starts_with("af_controls"),
+                  EAF = dplyr::starts_with("af_cases"),
                   EFFECT_ALLELE = alt, OTHER_ALLELE = ref) %>%
-    dplyr::mutate(EAF = (N_CASE*af_cases + N_CONTROL*af_controls)/(N)) %>%
     dplyr::mutate(P = 10^(-1*neglog10pval)) %>%
     dplyr::select(CHROM, POS, EFFECT_ALLELE, OTHER_ALLELE, EAF, BETA, SE, P, N_CASE, N_CONTROL, N) %>%
     tidyr::drop_na() %>%
-    dplyr::mutate(MARKER = glue::glue("{CHROM}_{POS}")) %>%
+    dplyr::mutate(MARKER = glue::glue("{CHROM}:{POS}:{OTHER_ALLELE}:{EFFECT_ALLELE}}")) %>%
     dplyr::select(MARKER, everything()) %>%
     tidyr::as_tibble()
   
@@ -38,18 +36,17 @@ process_ukbb <- function(df, n_case, n_control) {
   
 }
 
-process_mvp <- function(df, n_case, n_control) {
+process_mvp <- function(df, n_case, n_control) { AAF
   
   df <- df %>% 
-    dplyr::mutate(BETA = log(or), SE = abs(BETA / qnorm(pval / 2))) %>%
-    dplyr::mutate(N_CASE = n_case,N_CONTROL = n_control) %>%
+    dplyr::mutate(N_CASE = n_case, N_CONTROL = n_control) %>%
     dplyr::mutate(N = N_CASE + N_CONTROL) %>%
-    dplyr::rename(CHROM = chrom, POS = pos, EFFECT_ALLELE = ea, 
-                  OTHER_ALLELE = ref, EAF = af, P = pval) %>%
+    dplyr::rename(CHROM = CHR, POS = POS, EFFECT_ALLELE = ALT, 
+                  OTHER_ALLELE = REF, EAF = AAF) %>%
     dplyr::select(CHROM, POS, EFFECT_ALLELE, OTHER_ALLELE, 
                   EAF, BETA, SE, P, N_CASE, N_CONTROL, N) %>%
     tidyr::drop_na() %>%
-    dplyr::mutate(MARKER = glue::glue("{CHROM}_{POS}")) %>%
+    dplyr::mutate(MARKER = glue::glue("{CHROM}:{POS}:{OTHER_ALLELE}:{EFFECT_ALLELE}}")) %>%
     dplyr::select(MARKER, everything()) %>%
     tidyr::as_tibble()
   
@@ -65,7 +62,7 @@ process_finngen <- function(df, n_case, n_control) {
     tidyr::drop_na() %>%
     dplyr::rename(CHROM = `#chrom`, POS = pos, EFFECT_ALLELE = alt, OTHER_ALLELE = ref, 
                   EAF = af_alt, BETA = beta, SE = sebeta, P = pval) %>%
-    dplyr::mutate(MARKER = glue::glue("{CHROM}_{POS}")) %>%
+    dplyr::mutate(MARKER = glue::glue("{CHROM}:{POS}:{OTHER_ALLELE}:{EFFECT_ALLELE}}")) %>%
     dplyr::select(MARKER, everything()) %>%
     tidyr::as_tibble()
   
@@ -82,7 +79,7 @@ process_aou <- function(df, n_case, n_control) {
     dplyr::rename(EFFECT_ALLELE = Allele2, OTHER_ALLELE = Allele1, EAF = AF_Allele2, P = Pvalue) %>%
     dplyr::select(CHROM, POS, EFFECT_ALLELE, OTHER_ALLELE, EAF, BETA, SE, P, N_CASE, N_CONTROL, N) %>%
     tidyr::drop_na() %>%
-    dplyr::mutate(MARKER = glue::glue("{CHROM}_{POS}")) %>%
+    dplyr::mutate(MARKER = glue::glue("{CHROM}:{POS}:{OTHER_ALLELE}:{EFFECT_ALLELE}}")) %>%
     dplyr::select(MARKER, everything()) %>%
     tidyr::as_tibble()
   
