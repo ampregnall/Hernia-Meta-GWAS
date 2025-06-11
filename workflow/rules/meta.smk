@@ -1,4 +1,4 @@
-configfile: "config/config.yaml"# Load metadata
+configfile: "config/config.yaml"
 
 df = pd.read_table("config/studies.txt")
 df["id"] = df.apply(lambda row: f"{row.study}_{row.phenotype}_{row.population}", axis=1)
@@ -8,7 +8,7 @@ id_to_phenotype = {row.id: row.phenotype for row in df.itertuples(index=False)}
 
 rule filter_maf:
     input:
-        lambda wildcards: f"results/gwas-inspector/{id_to_phenotype[wildcards.id].lower()}-ldsc/QC_{wildcards.id}_LDSC_report.txt"
+        expand("results/gwas-inspector/{phenotype}-ldsc/QC_{id}_LDSC_report.txt", zip, phenotype=[id_to_phenotype[i] for i in ids], id=ids)
     output:
         "data/processed/sumstats-maf-filtered/{id}.txt"
     params:
