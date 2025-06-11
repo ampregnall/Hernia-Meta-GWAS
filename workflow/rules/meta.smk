@@ -8,7 +8,7 @@ id_to_phenotype = {row.id: row.phenotype for row in df.itertuples(index=False)}
 
 rule filter_maf:
     input:
-        lambda wildcards: f"results/gwas-inspector/{id_to_phenotype[wildcards.id].lower()}-ldsc/QC_{wildcards.id}.txt"
+        lambda wildcards: f"results/gwas-inspector/{id_to_phenotype[wildcards.id].lower()}-ldsc/QC_{wildcards.id}_LDSC_report.txt"
     output:
         "data/processed/sumstats-maf-filtered/{id}.txt"
     params:
@@ -20,14 +20,14 @@ rule filter_maf:
 
 rule create_meta_analysis_configs:
     input:
-        rules.filter_maf.output
+        expand("data/processed/sumstats-maf-filtered/{id}.txt", id=ids)
     output:
         metal = expand("data/processed/metal/config/{phenotype}-{population}.txt", 
-            phenotype=config['create_metal_configs']['phenotypes'],
-            population=config['create_metal_configs']['population']),
+            phenotype=config['create_metal_config']['phenotypes'],
+            population=config['create_metal_config']['populations']),
         mrmega = expand("data/processed/mr-mega/config/{phenotype}-{population}.in", 
-            phenotype=config['create_metal_configs']['phenotypes'],
-            population=config['create_metal_configs']['population'])
+            phenotype=config['create_metal_config']['phenotypes'],
+            population=config['create_metal_config']['populations'])
     params:
         utils = config["create_metal_config"]["utils"],
         data_dir = "data/processed/sumstats-maf-filtered",
