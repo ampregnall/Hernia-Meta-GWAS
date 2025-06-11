@@ -1,19 +1,18 @@
+input <- snakemake@input[[1]]
+output <- snakemake@output[[1]]
+utils <- snakemake@params[["utils"]]
+
+# Load libraries
 library(data.table)
 library(dplyr)
 
-# Command line input
-args <- commandArgs(trailingOnly = TRUE)
-input_file <- args[1]
-outfile <- basename(input_file)
-
 # Load summary statistics
-df <- fread(input_file)
+df <- fread(input)
 
 # Process files
-df <- df %>% 
+df <- df %>%
   dplyr::mutate(MAF = dplyr::if_else(EFF_ALL_FREQ < 0.5, EFF_ALL_FREQ, 1 - EFF_ALL_FREQ)) %>%
-  dplyr::filter(MAF > 50 / (2* N_CASES))
+  dplyr::filter(MAF > 50 / (2 * N_CASES))
 
 # Save data
-output_file <- paste0("data/processed/gwas-inspector-sumstats/", outfile)
-fwrite(df, output_file, sep = "\t")
+fwrite(df, output, sep = "\t")
