@@ -8,7 +8,7 @@ id_to_phenotype = {row.id: row.phenotype for row in df.itertuples(index=False)}
 
 rule filter_maf:
     input:
-        expand("results/gwas-inspector/{phenotype}-ldsc/QC_{id}_LDSC_report.txt", zip, phenotype=[id_to_phenotype[i] for i in ids], id=ids)
+        expand("results/gwas-inspector/{phenotype}-ldsc/QC_{id}_LDSC_report.txt", zip, phenotype=[id_to_phenotype[i].lower() for i in ids], id=ids)
     output:
         "data/processed/sumstats-maf-filtered/{id}.txt"
     params:
