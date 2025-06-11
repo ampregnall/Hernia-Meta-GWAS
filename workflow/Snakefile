@@ -9,6 +9,7 @@ configfile: "config/config.yaml"
 
 include: "rules/input.smk"
 include: "rules/ldsc.smk"
+include: "rules/meta.smk"
 
 def get_input(wc):
     df = pd.read_table("config/studies.txt")
@@ -23,4 +24,6 @@ def get_ldsc(wc):
 rule all:
     input:
         get_input,
-        get_ldsc
+        get_ldsc,
+        metal = expand("data/processed/metal/{phenotype}-{population}_metal-1.txt", phenotype=config['create_metal_config']['phenotypes'], population=config['create_metal_config']['populations']),
+        mrmega = expand("data/processed/mr-mega/{phenotype}-{population}.result", phenotype=config['create_metal_config']['phenotypes'], population=config['create_metal_config']['populations'])
