@@ -20,7 +20,7 @@ rule filter_maf:
 
 rule create_meta_analysis_configs:
     input:
-        filter_maf
+        rules.filter_maf.output
     output:
         metal = expand("data/processed/metal/config/{phenotype}-{population}.txt", 
             phenotype=config['create_metal_configs']['phenotypes'],
