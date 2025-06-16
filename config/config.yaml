@@ -10,7 +10,7 @@ filter_maf:
   utils: "workflow/rules/scripts/meta-analysis/metal_config.R"
 
 create_metal_config:
-  utils: "workflow/rules/scripts/metal/metal_config.R"
+  utils: "workflow/rules/scripts/meta-analysis/metal_config.R"
   phenotypes:
     - Abdominal
     - Ventral
