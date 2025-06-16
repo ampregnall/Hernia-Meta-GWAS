@@ -32,7 +32,7 @@ ss_fil = ss.filter_hapmap3(inplace=False)
 ss_fil.estimate_h2_by_ldsc(ref_ld = snakemake.params["ldsc_scores"],  w_ld = snakemake.params["ldsc_scores"])
 
 
-if np.float64(ss_fil.ldsc_h2['Intercept'][0]) > 1:
+if np.float64(ss_fil.ldsc_h2['Lambda_gc'][0]) > 1:
     ss.data['SE'] = ss.data['SE'] * np.sqrt(np.float64(ss_fil.ldsc_h2['Intercept'][0]))
     ss.data['Z'] = ss.data['BETA'] / ss.data['SE']
     ss.data['P'] = 2 * norm.sf(abs(ss.data['Z']))
