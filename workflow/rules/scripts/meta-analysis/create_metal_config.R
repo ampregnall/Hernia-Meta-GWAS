@@ -12,11 +12,11 @@ populations <- snakemake@config$create_metal_config$populations
 for (phenotype in phenotypes) {
   files <- grep(phenotype, studies, value = TRUE)
 
-  for (ancestry in ancestries) {
-    if (ancestry == "ALL") {
+  for (population in populations) {
+    if (population == "ALL") {
       metal_config(
         config_name = paste(phenotype, "ALL", sep = "-"),
-        output_dir = output_dir,
+        output_dir = metal_dir,
         study_files = files,
         MARKERLABEL = "MARKER",
         CHROMOSOMELABEL = "CHR",
@@ -31,13 +31,13 @@ for (phenotype in phenotypes) {
         SAMPLESIZE = "N_TOTAL"
       )
       
-      writeLines(files, paste0(mega_dir, "/", phenotype, "-ALL.txt"))
+      writeLines(files, paste0(mega_dir, "/", phenotype, "-ALL.in"))
     } else {
-      study_files <- grep(ancestry, files, value = TRUE)
+      study_files <- grep(population, files, value = TRUE)
 
       metal_config(
-        config_name = paste(phenotype, ancestry, sep = "-"),
-        output_dir = output_dir,
+        config_name = paste(phenotype, population, sep = "-"),
+        output_dir = metal_dir,
         study_files = study_files,
         MARKERLABEL = "MARKER",
         CHROMOSOMELABEL = "CHR",
@@ -52,7 +52,6 @@ for (phenotype in phenotypes) {
         SAMPLESIZE = "N_TOTAL"
       )
       
-      writeLines(files, paste0(mega_dir, "/", phenotype, "-", ancestry, ".txt"))
     }
   }
 }
