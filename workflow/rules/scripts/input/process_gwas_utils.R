@@ -1,13 +1,32 @@
 # Load libraries
 library(magrittr)
 
-liftover_37_to_38 <- function(df, chainfile) {
+liftover_37_to_38 <- function(df, chr, pos, chainfile) {
   
   df <- df %>%
-    dplyr::mutate(chr = glue::glue("chr{chr}")) %>%
-    dplyr::mutate(start = pos, end = start) %>%
+    dplyr::mutate("{{chr}}" := paste0("chr", {{chr}})) %>%
+    dplyr::mutate(start = {{pos}}, end = start) %>%
     GenomicRanges::makeGRangesFromDataFrame(keep.extra.columns = TRUE, starts.in.df.are.0based = FALSE) %>%
     rtracklayer::liftOver(., rtracklayer::import.chain(chainfile)) %>%
+    tidyr::as_tibble()
+  
+  return(df)
+  
+}
+
+process_bjp <- function(df, n_case, n_control) {
+  
+  df <- df %>%
+    dplyr::select(!POS) %>% # Remove original POS column
+    dplyr::mutate(CHROM = as.numeric(stringr::str_replace(seqnames, "chr", ""))) %>%
+    dplyr::mutate(N_CASE = n_case, N_CONTROL = n_control) %>%
+    dplyr::mutate(N = N_CASE + N_CONTROL) %>%
+    dplyr::rename(POS = start, P = p.value, EAF = AF.Cases,
+                  EFFECT_ALLELE = Allele2, OTHER_ALLELE = Allele1) %>%
+    dplyr::select(CHROM, POS, EFFECT_ALLELE, OTHER_ALLELE, EAF, BETA, SE, P, N_CASE, N_CONTROL, N) %>%
+    tidyr::drop_na() %>%
+    dplyr::mutate(MARKER = glue::glue("{CHROM}:{POS}:{OTHER_ALLELE}:{EFFECT_ALLELE}")) %>%
+    dplyr::select(MARKER, everything()) %>%
     tidyr::as_tibble()
   
   return(df)
