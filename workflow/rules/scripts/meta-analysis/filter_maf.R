@@ -1,6 +1,5 @@
 input <- snakemake@input[[1]]
 output <- snakemake@output[[1]]
-utils <- snakemake@params[["utils"]]
 
 # Load libraries
 library(data.table)
@@ -11,7 +10,7 @@ df <- fread(input)
 
 # Process files
 df <- df %>%
-  dplyr::mutate(MAF = dplyr::if_else(EFF_ALL_FREQ < 0.5, EFF_ALL_FREQ, 1 - EFF_ALL_FREQ)) %>%
+  dplyr::mutate(MAF = dplyr::if_else(EAF < 0.5, EAF, 1 - EAF)) %>%
   dplyr::filter(MAF > 50 / (2 * N_CASE))
 
 # Save data
