@@ -6,8 +6,8 @@ mega_dir <- snakemake@params[["mrmega"]]
 source(utils)
 studies <- list.files(dir, full.names = TRUE)
 
-phenotypes <- snakemake@config$create_metal_config$phenotypes
-populations <- snakemake@config$create_metal_config$populations
+phenotypes <- snakemake@config$create_meta_analysis_configs$phenotypes
+populations <- snakemake@config$create_meta_analysis_configs$populations
 
 for (phenotype in phenotypes) {
   files <- grep(phenotype, studies, value = TRUE)
@@ -18,40 +18,45 @@ for (phenotype in phenotypes) {
         config_name = paste(phenotype, "ALL", sep = "-"),
         output_dir = metal_dir,
         study_files = files,
-        MARKERLABEL = "MARKER",
+        MARKERLABEL = "SNPID",
         CHROMOSOMELABEL = "CHR",
-        POSITIONLABEL = "POSITION",
-        EFFECT_ALLELE = "EFFECT_ALL",
-        OTHER_ALLELE = "OTHER_ALL",
-        EFFECTLABEL = "EFFECT",
-        STDERR = "STDERR",
-        FREQLABEL = "EFF_ALL_FREQ",
+        POSITIONLABEL = "POS",
+        EFFECT_ALLELE = "EA",
+        OTHER_ALLELE = "NEA",
+        EFFECTLABEL = "BETA",
+        STDERR = "SE",
+        FREQLABEL = "EAF",
         NCASE = "N_CASE",
         NCONTROL = "N_CONTROL",
-        SAMPLESIZE = "N_TOTAL"
+        SAMPLESIZE = "N"
       )
       
       writeLines(files, paste0(mega_dir, "/", phenotype, "-ALL.in"))
     } else {
       study_files <- grep(population, files, value = TRUE)
+      
+      if (length(study_files == 0)) {
+        next
+      }
 
       metal_config(
         config_name = paste(phenotype, population, sep = "-"),
         output_dir = metal_dir,
         study_files = study_files,
-        MARKERLABEL = "MARKER",
+        MARKERLABEL = "SNPID",
         CHROMOSOMELABEL = "CHR",
-        POSITIONLABEL = "POSITION",
-        EFFECT_ALLELE = "EFFECT_ALL",
-        OTHER_ALLELE = "OTHER_ALL",
-        EFFECTLABEL = "EFFECT",
-        STDERR = "STDERR",
-        FREQLABEL = "EFF_ALL_FREQ",
+        POSITIONLABEL = "POS",
+        EFFECT_ALLELE = "EA",
+        OTHER_ALLELE = "NEA",
+        EFFECTLABEL = "BETA",
+        STDERR = "SE",
+        FREQLABEL = "EAF",
         NCASE = "N_CASE",
         NCONTROL = "N_CONTROL",
-        SAMPLESIZE = "N_TOTAL"
+        SAMPLESIZE = "N"
       )
       
+      writeLines(study_files, paste0(mega_dir, "/", phenotype, "-", population, ".in"))
     }
   }
 }
