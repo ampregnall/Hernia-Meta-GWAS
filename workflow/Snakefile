@@ -7,23 +7,58 @@ import yaml
 
 configfile: "config/config.yaml"
 
+# Load metadata
+df = pd.read_table("config/studies.txt")
+df["id"] = df.apply(lambda row: f"{row.study}_{row.phenotype}_{row.population}", axis=1)
+df["ldsc"] = df.apply(lambda row: f"data/meta/gwaslab-references/ldsc/{row.population}/UKBB.{row.population}", axis=1)
+metadata = {row.id: row._asdict() for row in df.itertuples(index=False)}
+ids = list(metadata.keys())
+id_to_phenotype = {row.id: row.phenotype for row in df.itertuples(index=False)}
+
+# Create input files for meta analysis
+sumstats_harmonized = df.apply(lambda x: f'data/processed/sumstats-harmonized/{x["study"]}_{x["phenotype"]}_{x["population"]}.txt', axis = 1).tolist()    
+sumstats_ldsc = df.apply(lambda x: f'data/processed/sumstats-ldsc-corrected/{x["study"]}_{x["phenotype"]}_{x["population"]}_LDSC.txt', axis = 1).tolist()    
+sumstats_maffil = df.apply(lambda x: f'data/processed/sumstats-maf-filtered/{x["study"]}_{x["phenotype"]}_{x["population"]}_LDSC.txt', axis = 1).tolist()
+
+# Create config files for meta analysis
+phenotypes = config['create_meta_analysis_configs']['phenotypes']
+populations = config['create_meta_analysis_configs']['populations']
+
+# determine valid pairs with >=2 sumstats
+valid_pairs = []
+
+for phenotype in phenotypes:
+    valid_pairs.append((phenotype, "ALL"))
+    for population in populations:
+        matched = df[(df["phenotype"] == phenotype) & (df["population"] == population)]
+        if len(matched) >= 2:
+            valid_pairs.append((phenotype, population))
+
+# use these for the rule
+metal_config = [f"data/processed/metal/{pheno}-{pop}_metal-config.txt" for pheno, pop in valid_pairs]
+mrmega_config = [f"data/processed/mr-mega/config/{pheno}-{pop}.in" for pheno, pop in valid_pairs]
+metal_results = [f"data/processed/metal/{pheno}-{pop}_metal-1.txt" for pheno, pop in valid_pairs]
+mrmega_results = [f"data/processed/mr-mega/{pheno}-{pop}.result" for pheno, pop in valid_pairs]
+lead_vars_metal = [f"data/processed/lead-variants/metal/{pheno}-{pop}_lead_variants.txt" for pheno, pop in valid_pairs]
+lead_vars_mega = [f"data/processed/lead-variants/mr-mega/{pheno}-{pop}_lead_variants.txt" for pheno, pop in valid_pairs]
+mqq_metal = [f"results/mqq-plots/metal/{pheno}-{pop}_mqq_plot.png" for pheno, pop in valid_pairs]
+mqq_mrmega = [f"results/mqq-plots/mr-mega/{pheno}-{pop}_mqq_plot.png" for pheno, pop in valid_pairs]
+
+# Load rules
 include: "rules/input.smk"
 include: "rules/ldsc.smk"
 include: "rules/meta.smk"
 
-def get_input(wc):
-    df = pd.read_table("config/studies.txt")
-    files = df.apply(lambda x: f'data/processed/gwas-summary-statistics/{x["study"]}_{x["phenotype"]}_{x["population"]}.txt', axis = 1).tolist()    
-    return files
-
-def get_ldsc(wc):
-    df = pd.read_table("config/studies.txt")
-    files = df.apply(lambda x: f'data/processed/sumstats-ldsc-corrected/{x["study"]}_{x["phenotype"]}_{x["population"]}_LDSC.txt', axis = 1).tolist()    
-    return files
-
 rule all:
     input:
-        get_input,
-        get_ldsc,
-        metal = expand("data/processed/metal/{phenotype}-{population}_metal-1.txt", phenotype=config['create_metal_config']['phenotypes'], population=config['create_metal_config']['populations']),
-        mrmega = expand("data/processed/mr-mega/{phenotype}-{population}.result", phenotype=config['create_metal_config']['phenotypes'], population=config['create_metal_config']['populations'])
+        sumstats_harmonized,
+        sumstats_ldsc,
+        sumstats_maffil,
+        metal_config,
+        mrmega_config,
+        metal_results,
+        mrmega_results,
+        lead_vars_metal,
+        lead_vars_mega,
+        mqq_metal,
+        mqq_mrmega
