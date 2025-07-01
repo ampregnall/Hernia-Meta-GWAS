@@ -6,10 +6,7 @@ ldsc_correction:
   rsid_tsv: "data/meta/gwaslab-references/assign-rsid/1kg_dbsnp151_hg38_auto.txt.gz"
   rsid_vcf: "data/meta/gwaslab-references/assign-rsid/GCF_000001405.40.gz"
 
-filter_maf:
-  utils: "workflow/rules/scripts/meta-analysis/metal_config.R"
-
-create_metal_config:
+create_meta_analysis_configs:
   utils: "workflow/rules/scripts/meta-analysis/metal_config.R"
   phenotypes:
     - Abdominal
