@@ -24,6 +24,8 @@ ss.basic_check()
 lead_vars = ss.get_lead(anno=True)
 lead_vars.to_csv(snakemake.output["lead_vars"], sep="\t", index=False)
 
+var_list = lead_vars.sort_values(by="P").head(10)
+
 # Create MQQ plot with lead variant annotations
-ss.plot_mqq(anno=True, highlight=list(lead_vars.SNPID), save=snakemake.output["fig"],
-                    save_args={"dpi":300,"facecolor":"white"})
+ss.plot_mqq(anno="GENENAME", highlight=list(var_list.SNPID), anno_set=list(var_list.SNPID), 
+            save=snakemake.output["fig"], save_args={"dpi":300,"facecolor":"white"})
