@@ -5,3 +5,21 @@ process_gwas:
 ldsc_correction:
   rsid_tsv: "data/meta/gwaslab-references/assign-rsid/1kg_dbsnp151_hg38_auto.txt.gz"
   rsid_vcf: "data/meta/gwaslab-references/assign-rsid/GCF_000001405.40.gz"
+
+create_meta_analysis_configs:
+  utils: "workflow/rules/scripts/meta-analysis/metal_config.R"
+  phenotypes:
+    - Abdominal
+    - Ventral
+    - Inguinal
+    - Diaphragmatic
+    - Umbilical
+    - Femoral
+  populations:
+    - ALL
+    - EUR
+    - EAS
+    - CSA
+    - AFR
+    - MID
+    - AMR

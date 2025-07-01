@@ -1,7 +1,7 @@
 name: common
 channels:
-  - conda-forge
   - bioconda
+  - conda-forge
 dependencies:
   - r-base=4.3
   - r-tidyverse
@@ -13,3 +13,6 @@ dependencies:
   - pip
   - bioconductor-rtracklayer
   - bioconductor-genomicranges
+  - bioconductor-snplocs.hsapiens.dbsnp144.grch38
+  - bioconductor-bsgenome.hsapiens.ncbi.grch38
+  - bioconductor-mungesumstats
