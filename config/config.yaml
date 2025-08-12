@@ -23,3 +23,15 @@ create_meta_analysis_configs:
     - AFR
     - MID
     - AMR
+
+metal_format:
+  phenotypes:
+    - Ventral
+    - Inguinal
+    - Diaphragmatic
+    - Umbilical
+    - Femoral
+  
+hyprcoloc:
+  locus: "workflow/rules/scripts/finemapping/locus_extract.R"
+  creds: "workflow/rules/scripts/finemapping/cred_sets.R"
