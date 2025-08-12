@@ -38,6 +38,7 @@ for phenotype in phenotypes:
 metal_config = [f"data/processed/metal/{pheno}-{pop}_metal-config.txt" for pheno, pop in valid_pairs]
 mrmega_config = [f"data/processed/mr-mega/config/{pheno}-{pop}.in" for pheno, pop in valid_pairs]
 metal_results = [f"data/processed/metal/{pheno}-{pop}_metal-1.txt" for pheno, pop in valid_pairs]
+metal_sumstats = [f"data/processed/metal-formatted/{pheno}-ALL_metal_formatted.txt" for pheno in config['metal_format']['phenotypes']]
 mrmega_results = [f"data/processed/mr-mega/{pheno}-{pop}.result" for pheno, pop in valid_pairs]
 lead_vars_metal = [f"data/processed/lead-variants/metal/{pheno}-{pop}_lead_variants.txt" for pheno, pop in valid_pairs]
 lead_vars_mega = [f"data/processed/lead-variants/mr-mega/{pheno}-{pop}_lead_variants.txt" for pheno, pop in valid_pairs]
@@ -48,6 +49,7 @@ mqq_mrmega = [f"results/mqq-plots/mr-mega/{pheno}-{pop}_mqq_plot.png" for pheno,
 include: "rules/input.smk"
 include: "rules/ldsc.smk"
 include: "rules/meta.smk"
+include: "rules/finemapping.smk"
 
 rule all:
     input:
@@ -57,8 +59,13 @@ rule all:
         metal_config,
         mrmega_config,
         metal_results,
+        metal_sumstats,
         mrmega_results,
         lead_vars_metal,
         lead_vars_mega,
         mqq_metal,
-        mqq_mrmega
+        mqq_mrmega,
+        colocalization = "data/processed/finemapping/HyPrColoc_results.txt",
+        credset = "data/processed/finemapping/HyPrColoc_finemapping.txt",
+        eqtl = "data/processed/variant-annotation/eqtl/HyPrColoc_eqtl_results.txt",
+        #get_rsparsepro_input
