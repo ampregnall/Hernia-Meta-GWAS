@@ -53,31 +53,20 @@ rule run_hyprcoloc:
     script:
         "scripts/finemapping/run_hyprcoloc.R"
 
-rule rsparsepro_input:
+rule run_rsparsepro:
     input:
         sumstats = "data/processed/metal-formatted/{phenotype}-ALL_metal_formatted.txt",
-        lead_vars = "data/processed/lead-variants/metal/{phenotype}-ALL_lead_variants.txt",
+        lead = "data/processed/lead-variants/metal/{phenotype}-ALL_lead_variants.txt",
     output:
-        z_scores = "data/processed/finemapping/RSparsePro_{phenotype}_finemapping.txt",
+        rsparsepro = "data/processed/finemapping/RSparsePro_{phenotype}_finemapping.txt",
+        stats = "data/processed/finemapping/RSparsePro_{phenotype}_stats.txt"
     params:
-        phenotype = lambda wildcards : wildcards.phenotype,
-        z_path = "data/processed/RSparsePro/input/z-scores/",
-        snp_path = "data/processed/RSparsePro/input/snps/"
+        utils = "scripts/finemapping/locus_utils.R",
+        rsparse = "scripts/finemapping/rsparsepro_ld.py",
+        bed = "data/meta/finemapping/phase3_MAF_0.01.rds"
+    resources:
+        mem_mb = 64000
     conda:
         "envs/common.yaml"
-    shell:
-        "touch {output.z_scores}"
-
-rule run_hyprcoloc_eqtl:
-    input:
-        expand("data/processed/metal-formatted/{phenotype}-ALL_metal_formatted.txt", phenotype=config["metal_format"]["phenotypes"])
-    output:
-        colocalization = "data/processed/variant-annotation/eqtl/HyPrColoc_eqtl_results.txt",
-    conda:
-        "envs/hyprcoloc.yaml"
-    params:
-        locus = config["hyprcoloc"]["locus"]
-    resources:
-        mem_mb = 200000
     script:
-        "scripts/variant-annotation/hyprcoloc_eqtl.R"
+        "scripts/finemapping/rsparsepro_reticulate.R"
