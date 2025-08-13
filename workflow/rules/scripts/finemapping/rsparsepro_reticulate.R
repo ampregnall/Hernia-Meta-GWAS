@@ -1,31 +1,22 @@
-# ---- RETICULATE SETUP ----
-# Prefer a Python explicitly given by the job environment; if not, fall back to the
-# Python on PATH (works great when the Snakemake rule uses `conda:`).
-py_exec <- Sys.getenv("RETICULATE_PYTHON", unset = "")
+# Neutralize any poisoned conda hints
+Sys.unsetenv("RETICULATE_CONDA")
+options(reticulate.conda_binary = NULL)
 
-if (py_exec == "") {
-  # Use Python from the current shell's PATH (e.g., Snakemake conda env)
-  py_exec <- unname(Sys.which("python"))
-  if (is.na(py_exec) || py_exec == "") {
-    stop("No Python found. Set RETICULATE_PYTHON or ensure python is on PATH.")
-  }
+# Take Python from the active Snakemake env on PATH
+py_exec <- unname(Sys.which("python"))
+if (!nzchar(py_exec) || !file.exists(py_exec)) {
+  logger::log_error("No Python on PATH; are you running inside a Snakemake conda rule?")
+  stop()
 }
 
-# Sanity check before binding reticulate
-if (!file.exists(py_exec)) {
-  stop(sprintf("Configured Python does not exist: %s", py_exec))
-}
-
-# Lock reticulate to that interpreter
 Sys.setenv(RETICULATE_PYTHON = py_exec)
 library(reticulate)
 reticulate::use_python(py_exec, required = TRUE)
-cfg <- reticulate::py_config()
-message("Using Python: ", cfg$python, " (", cfg$version, ")")
+reticulate::py_config()  # prints which python; good for logs
+
 
 library(bigsnpr)
 library(tidyverse)
-library(reticulate)
 library(logger)
 
 # Extract snakemake objects
