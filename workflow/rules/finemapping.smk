@@ -62,7 +62,7 @@ rule run_rsparsepro:
         stats = "data/processed/finemapping/RSparsePro_{phenotype}_stats.txt"
     params:
         utils = "workflow/rules/scripts/finemapping/locus_extract.R",
-        rsparse = "workflow/rules/scripts/finemapping/rsparsepro_ld.py",
+        rsparsepro = "workflow/rules/scripts/finemapping/rsparsepro_ld.py",
         bed = "/project/voltron/Resources/1000-Genomes-Phase3/1kg_all_phase3/1kg_all_phase3.rds"
     resources:
         mem_mb = 64000
