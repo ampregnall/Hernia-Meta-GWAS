@@ -44,6 +44,8 @@ lead_vars_metal = [f"data/processed/lead-variants/metal/{pheno}-{pop}_lead_varia
 lead_vars_mega = [f"data/processed/lead-variants/mr-mega/{pheno}-{pop}_lead_variants.txt" for pheno, pop in valid_pairs]
 mqq_metal = [f"results/mqq-plots/metal/{pheno}-{pop}_mqq_plot.png" for pheno, pop in valid_pairs]
 mqq_mrmega = [f"results/mqq-plots/mr-mega/{pheno}-{pop}_mqq_plot.png" for pheno, pop in valid_pairs]
+colocalization = "data/processed/finemapping/HyPrColoc_results.txt",
+credset = "data/processed/finemapping/HyPrColoc_finemapping.txt",
 rsparsepro_results = [f"data/processed/finemapping/RSparsePro_{pheno}_finemapping.txt" for pheno in config['metal_format']['phenotypes']]
 rsparsepro_stats = [f"data/processed/finemapping/RSparsePro_{pheno}_stats.txt" for pheno in config['metal_format']['phenotypes']]
 
@@ -67,9 +69,7 @@ rule all:
         lead_vars_mega,
         mqq_metal,
         mqq_mrmega,
-        colocalization = "data/processed/finemapping/HyPrColoc_results.txt",
-        credset = "data/processed/finemapping/HyPrColoc_finemapping.txt",
+        colocalization,
+        credset,
         rsparsepro_results,
         rsparsepro_stats
-        #eqtl = "data/processed/variant-annotation/eqtl/HyPrColoc_eqtl_results.txt",
-        #get_rsparsepro_input
