@@ -61,12 +61,12 @@ rule run_rsparsepro:
         rsparsepro = "data/processed/finemapping/RSparsePro_{phenotype}_finemapping.txt",
         stats = "data/processed/finemapping/RSparsePro_{phenotype}_stats.txt"
     params:
-        utils = "scripts/finemapping/locus_utils.R",
+        utils = "scripts/finemapping/locus_extract.R",
         rsparse = "scripts/finemapping/rsparsepro_ld.py",
-        bed = "data/meta/finemapping/phase3_MAF_0.01.rds"
+        bed = "/project/voltron/Resources/1000-Genomes-Phase3/1kg_all_phase3/1kg_all_phase3.rds"
     resources:
         mem_mb = 64000
     conda:
-        "envs/common.yaml"
+        "envs/rsparsepro.yaml"
     script:
         "scripts/finemapping/rsparsepro_reticulate.R"

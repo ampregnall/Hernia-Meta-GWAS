@@ -90,14 +90,6 @@ class RSparsePro(object):
     def get_ztilde(self):
         return self.tilde_b.round(4)
 
-    #def get_resz(self, bhat, ld, eff):
-    #    idx = [i[0] for i in eff.values()]
-    #    realmu = np.zeros(len(bhat))
-    #    realmu[idx] = np.dot(np.linalg.inv(ld[np.ix_(idx, idx)]), bhat[idx])
-    #    estz = np.dot(ld, realmu)
-    #    resz = bhat - estz
-    #    return resz.round(4)
-
 def get_eff_maxld(eff, ld):
     idx = [i[0] for i in eff.values()]
     if len(eff)>1:
@@ -134,7 +126,6 @@ def adaptive_train(zscore, ld, K, maxite, eps, ubound, cthres, minldthres, maxld
         logging.info("Min ld within effect groups: {}.".format(minld))
         logging.info("vare = {}".format(round(vare,4)))
         if vare > varemax or (len(eff)<2 and get_ordered(eff_mu)):
-            #logging.info("Algorithm didn't converge at the max vare. Setting K to 1.")
             model = RSparsePro(len(zscore), 1, ld, 0)
             mc = model.train(zscore, ld, maxite, eps, ubound)
             eff, eff_gamma, eff_mu = model.get_effect(cthres)
@@ -144,15 +135,14 @@ def adaptive_train(zscore, ld, K, maxite, eps, ubound, cthres, minldthres, maxld
         else:
             vare *= eincre
     ztilde = model.get_ztilde()
-    #resz = model.get_resz(zscore, ld, eff)
     PIP = model.get_PIP()
     return eff, eff_gamma, eff_mu, PIP, ztilde #resz
 
 def parse_args():
     parser = argparse.ArgumentParser(description='RSparsePro Commands:')
-    parser.add_argument('--z', type=str, default=None, help='path to summary statistics', required=True)
-    parser.add_argument('--ld', type=str, default=None, help='path to ld matrix', required=True)
-    parser.add_argument('--save', type=str, default=None, help='path to save results', required=True)
+    parser.add_argument('--z', type=str, default=None, help='path to summary statistics')
+    parser.add_argument('--ld', type=str, default=None, help='path to ld matrix')
+    parser.add_argument('--save', type=str, default=None, help='path to save results')
     parser.add_argument('--K', type=int, default=10, help='largest number of causal signals')
     parser.add_argument('--maxite', type=int, default=100, help='max number of iterations')
     parser.add_argument('--eps', type=float, default=1e-5, help='convergence criterion')
@@ -169,15 +159,9 @@ def parse_args():
 def print_args(args):
     for arg in vars(args):
         logging.info(f"{arg}: {getattr(args, arg)}")
-
-if __name__ == '__main__':
-    args = parse_args()
-    logging.basicConfig(filename='{}.rsparsepro.log'.format(args.save), level=logging.INFO, filemode='w', format='%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S') # 
-    title()
-    print_args(args)
-    zfile = pd.read_csv(args.z, sep='\t')
-    ld = pd.read_csv(args.ld, sep='\s+', header=None).fillna(0).values
-    eff, eff_gamma, eff_mu, PIP, ztilde = adaptive_train(zfile['Z'], ld, args.K, args.maxite, args.eps, args.ubound, args.cthres, args.minldthres, args.maxldthres, args.eincre, args.varemax, args.varemin)
+        
+def calculate_credible_sets(zfile, ld, K=10, maxite=100, eps=1e-5, ubound=100000, cthres=0.95, minldthres=0.7, maxldthres=0.2, eincre=1.5, varemax=100.0, varemin=1e-3):
+    eff, eff_gamma, eff_mu, PIP, ztilde = adaptive_train(zfile['Z'], ld, K, maxite, eps, ubound, cthres, minldthres, maxldthres, eincre, varemax, varemin)
     zfile['PIP'] = PIP
     zfile['z_estimated'] = ztilde
     #zfile['resz'] = resz
@@ -189,4 +173,5 @@ if __name__ == '__main__':
         logging.info(f'variant probabilities for this effect group: {eff_gamma[e]}')
         logging.info(f'zscore for this effect group: {eff_mu[e]}\n')
         zfile.iloc[eff[e], zfile.columns.get_loc('cs')] = e+1
-    zfile.to_csv('{}.rsparsepro.txt'.format(args.save), sep='\t', header=True, index=False)
+    #zfile.to_csv('{}.rsparsepro.txt'.format(args.save), sep='\t', header=True, index=False)
+    return(zfile)
