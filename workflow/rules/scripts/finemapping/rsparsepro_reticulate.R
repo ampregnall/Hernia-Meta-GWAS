@@ -1,3 +1,5 @@
+reticulate::use_condaenv("rsparsepro", required = TRUE)
+
 library(bigsnpr)
 library(tidyverse)
 library(reticulate)
