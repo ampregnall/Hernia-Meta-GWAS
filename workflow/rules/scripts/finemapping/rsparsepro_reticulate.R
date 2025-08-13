@@ -1,4 +1,12 @@
-reticulate::use_condaenv("rsparsepro", required = TRUE)
+py <- Sys.getenv("RETICULATE_PYTHON", unset = "/appl/miniconda/envs/rsparsepro/bin/python")
+Sys.setenv(RETICULATE_PYTHON = py)
+
+library(reticulate)
+
+# Lock reticulate to the chosen interpreter and print config for logs
+reticulate::use_python(py, required = TRUE)
+cfg <- reticulate::py_config()  # returns a LIST; don't overwrite with a string variable named "config"
+logger::log_info("Using Python: {cfg$python}")
 
 library(bigsnpr)
 library(tidyverse)
