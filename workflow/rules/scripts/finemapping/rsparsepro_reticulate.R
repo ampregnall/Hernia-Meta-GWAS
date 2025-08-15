@@ -1,23 +1,8 @@
-# Neutralize any poisoned conda hints
-Sys.unsetenv("RETICULATE_CONDA")
-options(reticulate.conda_binary = NULL)
-
-# Take Python from the active Snakemake env on PATH
-py_exec <- unname(Sys.which("python"))
-if (!nzchar(py_exec) || !file.exists(py_exec)) {
-  logger::log_error("No Python on PATH; are you running inside a Snakemake conda rule?")
-  stop()
-}
-
-Sys.setenv(RETICULATE_PYTHON = py_exec)
-library(reticulate)
-reticulate::use_python(py_exec, required = TRUE)
-reticulate::py_config()  # prints which python; good for logs
-
-
 library(bigsnpr)
 library(tidyverse)
 library(logger)
+library(reticulate)
+library(data.table)
 
 # Extract snakemake objects
 sumstats_path <- snakemake@input[["sumstats"]]
@@ -26,7 +11,7 @@ locus_utils <- snakemake@params[["utils"]]
 rsparse <- snakemake@params[["rsparsepro"]]
 stats_output <- snakemake@output[["stats"]]
 rsparsepro_output <- snakemake@output[["rsparsepro"]]
-bed <- snakemake@input[["bed"]]
+bed <- snakemake@params[["bed"]]
 
 # Load custom scripts
 source(locus_utils)
@@ -91,14 +76,15 @@ stats <- snp_correlations %>%
   purrr::map("logdf") %>%
   dplyr::bind_rows(.id = "LOCUS") 
 
-fwrite(stats, stats_output, sep = "\t")
+data.table::fwrite(stats, stats_output, sep = "\t")
 
 # Run RSparsePro ----------------------------------------------------------
 
 logger::log_info("Running RSparsePro...")
-rsparsepro_results <- purrr::map(test, function(x) {
+rsparsepro_results <- purrr::map(snp_correlations, function(x) {
   calculate_credible_sets(zfile = x[[1]], ld = x[[2]])})
 
-results <- rsparsepro_results %>% dplyr::bind_rows(.id = "LOCUS")
+results <- rsparsepro_results %>% dplyr::bind_rows(.id = "LOCUS") %>%
+  dplyr::filter(cs > 0)
 
-fwrite(results, rsparsepro_output, sep = "\t")
+data.table::fwrite(results, rsparsepro_output, sep = "\t")
