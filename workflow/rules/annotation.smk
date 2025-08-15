@@ -28,7 +28,7 @@ rule run_magma:
 rule run_pops:  
     input:
         magma_out = "data/processed/magma/{phenotype}/{phenotype}.genes.out",
-        magma_raw "data/processed/magma/{phenotype}/{phenotype}.genes.raw"
+        magma_raw = "data/processed/magma/{phenotype}/{phenotype}.genes.raw"
     output:
         preds = "data/processed/pops/{phenotype}/{phenotype}.preds",
         coefs = "data/processed/pops/{phenotype}/{phenotype}.coefs",
