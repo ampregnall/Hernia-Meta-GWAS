@@ -2,6 +2,7 @@ rule run_magma:
     input:
         sumstats = "data/processed/metal-formatted/{phenotype}-ALL_metal_formatted.txt"
     output:
+        infile = "data/processed/magma/{phenotype}.txt",
         out = "data/processed/magma/{phenotype}.genes.out",
         raw = "data/processed/magma/{phenotype}.genes.raw"
     params:
@@ -13,9 +14,13 @@ rule run_magma:
         n_col = "N"      
     shell:
         """
+        module load magma/1.07a 
+
+        awk 'FNR==1 {{ $15 = "SNP"; print $9, $10, $15 }} FNR > 1 && $15 != "" {{ print $9, $10, $15 }}' {input.sumstats} > {output.infile} 
+        
         magma --bfile {params.bfile} \
               --gene-annot {params.gene_file} \
-              --pval {input.sumstats} use={params.snp_col},{params.p_col} ncol={params.n_col} \
+              --pval {output.infile} use={params.snp_col},{params.p_col} ncol={params.n_col} \
               --gene-model snp-wise=mean \
               --out {params.out_prefix}
         """
