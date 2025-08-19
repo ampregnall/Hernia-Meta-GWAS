@@ -6,9 +6,9 @@ rule run_magma:
         out = "data/processed/magma/{phenotype}/{phenotype}.genes.out",
         raw = "data/processed/magma/{phenotype}/{phenotype}.genes.raw"
     params:
-        bfile = "/project/voltron/Resources/1000-Genomes-Phase3/1kg_all_phase3/all_phase3",
-        gene_file = "/project/voltron/Resources/MAGMA/NCBI37/NCBI37.genes.annot",
-        out_prefix = lambda wc: f"data/processed/magma/{wc.phenotype}",
+        bfile = "data/meta/magma/1000G_all_hg38",
+        gene_file = "data/meta/magma/GRCh38.genes.ensg.genes.annot",
+        out_prefix = lambda wc: f"data/processed/magma/{wc.phenotype}/{wc.phenotype}",
         snp_col = "SNP",
         p_col = "P",
         n_col = "N"      
@@ -30,22 +30,22 @@ rule run_pops:
         magma_out = "data/processed/magma/{phenotype}/{phenotype}.genes.out",
         magma_raw = "data/processed/magma/{phenotype}/{phenotype}.genes.raw"
     output:
-        preds = "data/processed/pops/{phenotype}/{phenotype}.preds",
-        coefs = "data/processed/pops/{phenotype}/{phenotype}.coefs",
-        marginals = "data/processed/pops/{phenotype}/{phenotype}.marginals"
+        preds = "data/processed/pops/{phenotype}.preds",
+        coefs = "data/processed/pops/{phenotype}.coefs",
+        marginals = "data/processed/pops/{phenotype}.marginals"
     params:
         out_prefix = lambda wc: f"data/processed/pops/{wc.phenotype}",
-        magma_prefix = lambda wc: f"data/processed/magma/{wc.phenotype}",
+        magma_prefix = lambda wc: f"data/processed/magma/{wc.phenotype}/{wc.phenotype}",
         gene_annot_path = "data/meta/pops/utils/gene_annot.txt",
         control_features_path = "data/meta/pops/utils/features_control.txt",
-        feature_mat_prefix = "data/meta/pops/features-munged"
+        feature_mat_prefix = "data/meta/pops/features-munged/features-munged"
     conda:
         "envs/pops.yaml"
     shell:
         """
-        python workflow/rules/scripts/annotation/pops.py \
+        python workflow/rules/scripts/variant-annotation/pops.py \
             --gene_annot_path {params.gene_annot_path} \
-            --feature_mat_prefix example/data/features_munged/pops_features \
+            --feature_mat_prefix {params.feature_mat_prefix} \
             --num_feature_chunks 115 \
             --magma_prefix {params.magma_prefix} \
             --control_features_path {params.control_features_path} \
