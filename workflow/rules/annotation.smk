@@ -52,20 +52,20 @@ rule run_pops:
             --out_prefix {params.out_prefix}
         """
 
-# TODO: Create rule to run HyPrColo
+rule run_hyprcoloc_eqtl:
+    input:
+        sumstats = "data/processed/metal-formatted/{phenotype}-ALL_metal_formatted.txt",
+        lead = "data/processed/lead-variants/metal/{phenotype}-ALL_lead_variants.txt"
+    output:
+        eqtl = "data/processed/variant-annotation/eqtl/{phenotype}_eqtl_colocalization.txt",
+    conda:
+        "envs/hyprcoloc.yaml"
+    params:
+        locus = config["hyprcoloc"]["locus"],
+        eqtl = "data/meta/eqtl/QTD000216.all.tsv",
+        min_overlap = 50
+    script:
+         "scripts/variant-annotation/hyprcoloc_eqtl.R"
+
 # TODO Create rule to run open chromatin annotation
 # TODO: Create rule to run most severe consequence annotation
-
-# rule run_hyprcoloc_eqtl:
-#     input:
-#         expand("data/processed/metal-formatted/{phenotype}-ALL_metal_formatted.txt", phenotype=config["metal_format"]["phenotypes"])
-#     output:
-#         colocalization = "data/processed/variant-annotation/eqtl/HyPrColoc_eqtl_results.txt",
-#     conda:
-#         "envs/hyprcoloc.yaml"
-#     params:
-#         locus = config["hyprcoloc"]["locus"]
-#     resources:
-#         mem_mb = 200000
-#     script:
-#         "scripts/variant-annotation/hyprcoloc_eqtl.R"

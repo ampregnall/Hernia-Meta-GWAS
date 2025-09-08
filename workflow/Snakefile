@@ -50,7 +50,8 @@ rsparsepro_results = [f"data/processed/finemapping/RSparsePro_{pheno}_finemappin
 rsparsepro_stats = [f"data/processed/finemapping/RSparsePro_{pheno}_stats.txt" for pheno in config['metal_format']['phenotypes']]
 magmaout = [f"data/processed/magma/{pheno}/{pheno}.genes.out" for pheno in config['metal_format']['phenotypes']]
 magmaraw = [f"data/processed/magma/{pheno}/{pheno}.genes.raw" for pheno in config['metal_format']['phenotypes']]
-pops = [f"data/processed/pops/{pheno}/{pheno}.preds" for pheno in config['metal_format']['phenotypes']]
+pops = [f"data/processed/pops/{pheno}.preds" for pheno in config['metal_format']['phenotypes']]
+eqtl = [f"data/processed/variant-annotation/eqtl/{pheno}_eqtl_colocalization.txt" for pheno in config['metal_format']['phenotypes']]
 
 # Load rules
 include: "rules/input.smk"
@@ -79,4 +80,5 @@ rule all:
         rsparsepro_stats,
         magmaout,
         magmaraw,
-        pops
+        pops,
+        eqtl
