@@ -7,3 +7,4 @@ data/**
 .snakemake/**
 *.Rhistory
 *.DS_Store
+notebooks/**
