@@ -67,5 +67,26 @@ rule run_hyprcoloc_eqtl:
     script:
          "scripts/variant-annotation/hyprcoloc_eqtl.R"
 
-# TODO Create rule to run open chromatin annotation
-# TODO: Create rule to run most severe consequence annotation
+rule annotate_open_chromatin:
+    input:
+        snps_in = "data/processed/finemapping/{phenotype}_{method}_finemapping.txt"
+    output:
+        snps_out = "data/processed/variant-annotation/open-chromatin/{phenotype}_{method}_open_chromatin.txt"
+    conda:
+        "envs/common.yaml"
+    script:
+        "scripts/variant-annotation/annotate_open_chromatin.R"
+
+rule annotate_most_severe_consequence:
+    input:
+        credset = "data/processed/finemapping/{phenotype}_{method}_finemapping.txt"
+    output:
+        out = "data/processed/variant-annotation/most-severe-consequence/{phenotype}_{method}_variant_consequence.txt"
+    conda:
+        "envs/opentargets.yaml"
+    params:
+        otarget = "workflow/rules/scripts/variant-annotation/open_targets_functions.R"
+    log:
+        "logs/annotation/annotate_most_severe_consequence/{phenotype}-{method}.log"
+    script:
+        "scripts/variant-annotation/most_severe_consequence.R"
