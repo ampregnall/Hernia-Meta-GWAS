@@ -30,7 +30,7 @@ sumstats <- purrr::map(phenotypes, function(phenotype) {
 lead_vars <- purrr::map(phenotypes, function(phenotype) {
   data.table::fread(glue::glue("data/processed/lead-variants/metal/{phenotype}-ALL_lead_variants.txt"))}) %>%
   dplyr::bind_rows() %>%
-  dplyr::mutate(START = POS - 250000, END = POS + 250000) %>%
+  dplyr::mutate(START = POS - 500000, END = POS + 500000) %>%
   tidygenomics::genome_cluster(by=c("CHR", "START", "END"), max_distance = 0) %>% 
   dplyr::slice_min(order_by = P, by=c("cluster_id"))
 
@@ -42,7 +42,7 @@ sumstats_windowed <- locus_extract(sumstats,
                           locus_chr_col = CHR,
                           locus_pos_col = POS,
                           locus_gene_col = GENE,
-                          locus_size = 5e5)
+                          locus_size = 1e6)
 
 # Run Coloc
 hyprcoloc_res <- sumstats_windowed %>%
