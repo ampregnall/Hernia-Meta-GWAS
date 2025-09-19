@@ -35,3 +35,7 @@ metal_format:
 hyprcoloc:
   locus: "workflow/rules/scripts/finemapping/locus_extract.R"
   creds: "workflow/rules/scripts/finemapping/cred_sets.R"
+
+bayesian_finemapping:
+  creds: "workflow/rules/scripts/finemapping/calculate_bayes_factor_credible_sets.R"
+  locus: "workflow/rules/scripts/finemapping/locus_extract.R"
