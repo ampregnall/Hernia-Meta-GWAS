@@ -6,7 +6,7 @@ locus_extract <- function(sumstats_df, # df containing summary statistics
                           locus_chr_col = chromosome,
                           locus_pos_col = position,
                           locus_gene_col = gene,
-                          locus_size = 5e5) {
+                          locus_size = 1e6) {
   
   locus_df <- locus_df %>%
     dplyr::select(chromosome = {{ locus_chr_col }}, lead_pos = {{ locus_pos_col }}, gene = {{ locus_gene_col }}) %>%
@@ -26,7 +26,7 @@ locus_extract <- function(sumstats_df, # df containing summary statistics
 
 locus_extract_dtable <- function(sumstats_df, 
                                  locus_df, 
-                                 locus_size = 5e5,
+                                 locus_size = 1e6,
                                  sumstats_chr_col, 
                                  sumstats_pos_col,
                                  locus_chr_col, 
