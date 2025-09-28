@@ -38,16 +38,52 @@ for phenotype in phenotypes:
 metal_config = [f"data/processed/metal/{pheno}-{pop}_metal-config.txt" for pheno, pop in valid_pairs]
 mrmega_config = [f"data/processed/mr-mega/config/{pheno}-{pop}.in" for pheno, pop in valid_pairs]
 metal_results = [f"data/processed/metal/{pheno}-{pop}_metal-1.txt" for pheno, pop in valid_pairs]
+metal_sumstats = [f"data/processed/metal-formatted/{pheno}-ALL_metal_formatted.txt" for pheno in config['metal_format']['phenotypes']]
 mrmega_results = [f"data/processed/mr-mega/{pheno}-{pop}.result" for pheno, pop in valid_pairs]
 lead_vars_metal = [f"data/processed/lead-variants/metal/{pheno}-{pop}_lead_variants.txt" for pheno, pop in valid_pairs]
 lead_vars_mega = [f"data/processed/lead-variants/mr-mega/{pheno}-{pop}_lead_variants.txt" for pheno, pop in valid_pairs]
 mqq_metal = [f"results/mqq-plots/metal/{pheno}-{pop}_mqq_plot.png" for pheno, pop in valid_pairs]
 mqq_mrmega = [f"results/mqq-plots/mr-mega/{pheno}-{pop}_mqq_plot.png" for pheno, pop in valid_pairs]
+colocalization = "data/processed/finemapping/HyPrColoc_results.txt",
+credset = "data/processed/finemapping/HyPrColoc_finemapping.txt",
+bayesian_finemapping = [f"data/processed/finemapping/{pheno}_bayesian_finemapping.txt" for pheno in config['metal_format']['phenotypes']]
+rsparsepro_finemapping = [f"data/processed/finemapping/{pheno}_rsparsepro_finemapping.txt" for pheno in config['metal_format']['phenotypes']]
+magmaout = [f"data/processed/magma/{pheno}/{pheno}.genes.out" for pheno in config['metal_format']['phenotypes']]
+magmaraw = [f"data/processed/magma/{pheno}/{pheno}.genes.raw" for pheno in config['metal_format']['phenotypes']]
+pops = [f"data/processed/pops/{pheno}.preds" for pheno in config['metal_format']['phenotypes']]
+eqtl = [f"data/processed/variant-annotation/eqtl/{pheno}_eqtl_colocalization.txt" for pheno in config['metal_format']['phenotypes']]
+chromatin_rsp = [f"data/processed/variant-annotation/open-chromatin/{pheno}_rsparsepro_open_chromatin.txt" for pheno in config['metal_format']['phenotypes']]
+chromatin_bf = [f"data/processed/variant-annotation/open-chromatin/{pheno}_bayesian_open_chromatin.txt" for pheno in config['metal_format']['phenotypes']]
+consequence_rsp = [f"data/processed/variant-annotation/most-severe-consequence/{pheno}_rsparsepro_variant_consequence.txt" for pheno in config['metal_format']['phenotypes']]
+consequence_bf = [f"data/processed/variant-annotation/most-severe-consequence/{pheno}_bayesian_variant_consequence.txt" for pheno in config['metal_format']['phenotypes']]
+
+
+def snps_targets_for_pheno(phenotype: str):
+    ck = checkpoints.identify_finemapping_loci.get(phenotype=phenotype)
+    pattern = os.path.join(ck.output[0], "{locus}.txt")
+    loci = glob_wildcards(pattern).locus
+    targets = []
+    for l in loci:
+        targets.append(f"data/processed/rsparsepro/{phenotype}/snps/{l}.snplist")
+        targets.append(f"data/processed/rsparsepro/{phenotype}/snps/{l}.a1")
+        targets.append(f"data/processed/rsparsepro/{phenotype}/ld/{l}.ld")
+        targets.append(f"data/processed/rsparsepro/{phenotype}/ld/{l}.snplist")
+        targets.append(f"data/processed/rsparsepro/{phenotype}/finemapping/{l}.rsparsepro.txt")
+    return targets
+
+# --- rule all: MUST accept wildcards (even if unused) ---
+def all_snps_targets(wildcards):
+    targets = []
+    for phe in ["Ventral", "Inguinal", "Femoral", "Diaphragmatic", "Umbilical"]:
+        targets.extend(snps_targets_for_pheno(phe))
+    return targets
 
 # Load rules
 include: "rules/input.smk"
 include: "rules/ldsc.smk"
 include: "rules/meta.smk"
+include: "rules/finemapping.smk"
+include: "rules/annotation.smk"
 
 rule all:
     input:
@@ -57,8 +93,22 @@ rule all:
         metal_config,
         mrmega_config,
         metal_results,
+        metal_sumstats,
         mrmega_results,
         lead_vars_metal,
         lead_vars_mega,
         mqq_metal,
-        mqq_mrmega
+        mqq_mrmega,
+        colocalization,
+        credset,
+        all_snps_targets,
+        bayesian_finemapping,
+        rsparsepro_finemapping,
+        magmaout,
+        magmaraw,
+        pops,
+        eqtl,
+        chromatin_rsp,
+        chromatin_bf,
+        consequence_rsp,
+        consequence_bf

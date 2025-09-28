@@ -1,0 +1,20 @@
+name: opentargets
+channels:
+  - conda-forge
+  - bioconda
+  - r
+dependencies:
+  # R and base packages
+  - r-base=4.3.*
+  - r-essentials
+  - r-dplyr
+  - r-tibble
+  - r-tidyr
+  - r-purrr
+  - r-stringr
+  - r-httr
+  - r-jsonlite
+  - r-logger
+  - r-rlang
+  - r-magrittr
+  

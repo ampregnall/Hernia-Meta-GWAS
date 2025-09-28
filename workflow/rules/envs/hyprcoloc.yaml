@@ -1,0 +1,26 @@
+name: hyprcoloc
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+  - anaconda
+dependencies:
+  - r-base=4.3
+  - r-tidyverse
+  - r-remotes
+  - r-data.table
+  - r-pheatmap
+  - r-devtools
+  - r-xml
+  - r-remotes
+  - r-curl
+  - r-jsonlite
+  - pip
+  - bioconda::r-tidygenomics
+  - r-rcppeigen=0.3.3.9.3
+  - r-gmp         # Needed for Rmpfr
+  - r-rmpfr
+  - r-arrangements
+  - r-iterpc
+  - anaconda::gmp        # System-level GMP library
+  - anaconda::mpfr       # System-level MPFR library
