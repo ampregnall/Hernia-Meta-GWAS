@@ -90,3 +90,16 @@ rule annotate_most_severe_consequence:
         "logs/annotation/annotate_most_severe_consequence/{phenotype}-{method}.log"
     script:
         "scripts/variant-annotation/most_severe_consequence.R"
+
+rule create_vep_input:
+    input:
+        sumstats = "data/processed/metal-formatted/{phenotype}_metal_formatted.txt",
+        lead = "data/processed/lead-variants/metal/{phenotype}_lead_variants.txt"
+    params:
+        vep = lambda wc: f"data/processed/vep/input/{wildcards.phenotype}"
+    output:
+        vep = "data/processed/vep/input/{phenotype}.vep"
+    conda:
+        "envs/gwaslab.yaml"
+    script:
+        "scripts/variant-annotation/create_vep_input.py"
