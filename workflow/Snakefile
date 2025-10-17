@@ -26,19 +26,23 @@ populations = config['create_meta_analysis_configs']['populations']
 
 # determine valid pairs with >=2 sumstats
 valid_pairs = []
+metal_pairs = []
 
 for phenotype in phenotypes:
     valid_pairs.append((phenotype, "ALL"))
+    metal_pairs.append((phenotype, "EAS"))
+    metal_pairs.append((phenotype, "ALL"))
     for population in populations:
         matched = df[(df["phenotype"] == phenotype) & (df["population"] == population)]
         if len(matched) >= 2:
             valid_pairs.append((phenotype, population))
+            metal_pairs.append((phenotype, population))
 
 # use these for the rule
 metal_config = [f"data/processed/metal/{pheno}-{pop}_metal-config.txt" for pheno, pop in valid_pairs]
 mrmega_config = [f"data/processed/mr-mega/config/{pheno}-{pop}.in" for pheno, pop in valid_pairs]
 metal_results = [f"data/processed/metal/{pheno}-{pop}_metal-1.txt" for pheno, pop in valid_pairs]
-metal_sumstats = [f"data/processed/metal-formatted/{pheno}-ALL_metal_formatted.txt" for pheno in config['metal_format']['phenotypes']]
+metal_sumstats = [f"data/processed/metal-formatted/{pheno}-{pop}_metal_formatted.txt" for pheno, pop in metal_pairs]
 mrmega_results = [f"data/processed/mr-mega/{pheno}-{pop}.result" for pheno, pop in valid_pairs]
 lead_vars_metal = [f"data/processed/lead-variants/metal/{pheno}-{pop}_lead_variants.txt" for pheno, pop in valid_pairs]
 lead_vars_mega = [f"data/processed/lead-variants/mr-mega/{pheno}-{pop}_lead_variants.txt" for pheno, pop in valid_pairs]
