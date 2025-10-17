@@ -25,9 +25,9 @@ rule identify_lead_variants_mrmega:
 
 rule format_metal:
     input:
-        "data/processed/metal/{phenotype}-ALL_metal-1.txt"
+        "data/processed/metal/{phenotype}_metal-1.txt"
     output:
-        sumstats = "data/processed/metal-formatted/{phenotype}-ALL_metal_formatted.txt"
+        sumstats = "data/processed/metal-formatted/{phenotype}_metal_formatted.txt"
     params:
         rsid_tsv = config["ldsc_correction"]["rsid_tsv"],
         rsid_vcf = config["ldsc_correction"]["rsid_vcf"]

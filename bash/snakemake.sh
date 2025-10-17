@@ -10,6 +10,6 @@
 module load miniconda
 source activate snakemake2
 
-cd /project/damrauer_wachtel/Hernia-PRS 
+cd /project/damrauer_wachtel/Hernia-Meta-GWAS 
 
 snakemake --use-conda --profile profile/default --rerun-triggers mtime
