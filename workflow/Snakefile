@@ -60,6 +60,7 @@ chromatin_rsp = [f"data/processed/variant-annotation/open-chromatin/{pheno}_rspa
 chromatin_bf = [f"data/processed/variant-annotation/open-chromatin/{pheno}_bayesian_open_chromatin.txt" for pheno in config['metal_format']['phenotypes']]
 consequence_rsp = [f"data/processed/variant-annotation/most-severe-consequence/{pheno}_rsparsepro_variant_consequence.txt" for pheno in config['metal_format']['phenotypes']]
 consequence_bf = [f"data/processed/variant-annotation/most-severe-consequence/{pheno}_bayesian_variant_consequence.txt" for pheno in config['metal_format']['phenotypes']]
+vep_input = [f"data/processed/vep/input/{pheno}-{pop}.vep" for pheno, pop in valid_pairs]
 
 
 def snps_targets_for_pheno(phenotype: str):
@@ -115,4 +116,5 @@ rule all:
         chromatin_rsp,
         chromatin_bf,
         consequence_rsp,
-        consequence_bf
+        consequence_bf,
+        vep_input
