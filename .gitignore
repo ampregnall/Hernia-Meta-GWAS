@@ -8,3 +8,5 @@ data/**
 *.Rhistory
 *.DS_Store
 notebooks/**
+figures/**
+.RData
