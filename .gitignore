@@ -10,3 +10,5 @@ data/**
 notebooks/**
 figures/**
 .RData
+# Manuscript drafts, reviewer correspondence, and archived exploratory code
+scratch/

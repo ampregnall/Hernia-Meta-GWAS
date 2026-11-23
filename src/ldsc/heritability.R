@@ -1,6 +1,6 @@
 library(ldscr)
 library(data.table)
-source("workflow/rules/scripts/ldsc/munge_sumstats.R")
+source("src/ldsc/munge_sumstats.R")
 
 input_dir <- "data/processed/metal-formatted"
 output_dir <- "data/processed/sumstats-munged/"

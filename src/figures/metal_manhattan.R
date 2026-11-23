@@ -1,7 +1,7 @@
 library(tidyverse)
 library(tidygenomics)
 library(ggfastman)
-source("workflow/rules/scripts/figures/gg_manhattan.R")
+source("src/figures/gg_manhattan.R")
 
 
 # Load summary statistics

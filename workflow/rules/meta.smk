@@ -12,13 +12,11 @@ rule create_meta_analysis_configs:
     input:
         expand("data/processed/sumstats-maf-filtered/{id}_LDSC.txt", id=ids)
     output:
-        metal = metal_config,
-        mrmega = mrmega_config
+        metal = metal_config
     params:
         utils = config["create_meta_analysis_configs"]["utils"],
         data_dir = "data/processed/sumstats-maf-filtered",
-        metal = "data/processed/metal",
-        mrmega = "data/processed/mr-mega/config"
+        metal = "data/processed/metal"
     conda:
         "envs/common.yaml"
     script:
@@ -33,35 +31,4 @@ rule run_metal:
         """
         module load metal/2020.05
         metal {input}
-        """
-
-rule run_mrmega:
-    input:
-        "data/processed/mr-mega/config/{meta}.in"
-    output:
-        "data/processed/mr-mega/{meta}.result"
-    shell:
-        """
-        module load MR-MEGA/0.2
-
-        NUM_DATASETS=$(wc -l < {input})
-        NUM_PCS=$((NUM_DATASETS - 3))
-
-        if [ "$NUM_PCS" -lt 1 ]; then
-           NUM_PCS=1
-        fi
-
-        MR-MEGA --filelist {input} --out data/processed/mr-mega/{wildcards.meta} \
-            --qt \
-            --name_pos POS \
-            --name_chr CHR \
-            --name_n N_CASE \
-            --name_beta BETA \
-            --name_eaf EAF \
-            --name_nea NEA \
-            --name_ea EA \
-            --name_marker SNPID \
-            --name_se SE \
-            --pc $NUM_PCS \
-            --no_std_names
         """

@@ -67,26 +67,42 @@ rule run_hyprcoloc_eqtl:
     script:
          "scripts/variant-annotation/hyprcoloc_eqtl.R"
 
-rule annotate_open_chromatin:
+rule create_vep_input:
     input:
-        snps_in = "data/processed/finemapping/{phenotype}_{method}_finemapping.txt"
+        sumstats = "data/processed/metal-formatted/{phenotype}_metal_formatted.txt",
+        lead = "data/processed/lead-variants/metal/{phenotype}_lead_variants.txt"
     output:
-        snps_out = "data/processed/variant-annotation/open-chromatin/{phenotype}_{method}_open_chromatin.txt"
-    conda:
-        "envs/common.yaml"
-    script:
-        "scripts/variant-annotation/annotate_open_chromatin.R"
-
-rule annotate_most_severe_consequence:
-    input:
-        credset = "data/processed/finemapping/{phenotype}_{method}_finemapping.txt"
-    output:
-        out = "data/processed/variant-annotation/most-severe-consequence/{phenotype}_{method}_variant_consequence.txt"
-    conda:
-        "envs/opentargets.yaml"
+        vep_input = "data/processed/vep/input/{phenotype}.vep"
     params:
-        otarget = "workflow/rules/scripts/variant-annotation/open_targets_functions.R"
-    log:
-        "logs/annotation/annotate_most_severe_consequence/{phenotype}-{method}.log"
+        vep_prefix = lambda wc: f"data/processed/vep/input/{wc.phenotype}"
+    conda:
+        "envs/gwaslab.yaml"
     script:
-        "scripts/variant-annotation/most_severe_consequence.R"
+        "scripts/variant-annotation/create_vep_input.py"
+
+rule run_vep:
+    input:
+        vep = "data/processed/vep/input/{phenotype}.vep"
+    output:
+        vep_annotation = "data/processed/vep/output/{phenotype}.txt"
+    shell:
+        """
+        NLINES=$(wc -l < {input.vep})
+        
+        if [ "$NLINES" -gt 0 ]; then
+            export APPTAINER_BIND="/lsf,/project/,/appl/,/scratch/,/static"
+            module load apptainer
+            apptainer exec /appl/containers/vep113.sif vep \
+                --cache \
+                --offline \
+                --pick \
+                --dir /static/vepcache113 \
+                --input_file {input.vep} \
+                --output_file {output.vep_annotation} \
+                --species homo_sapiens \
+                --assembly GRCh38 \
+                --force_overwrite
+        else
+            touch {output.vep_annotation}
+        fi
+        """
