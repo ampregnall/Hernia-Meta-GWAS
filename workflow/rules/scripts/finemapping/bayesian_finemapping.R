@@ -8,7 +8,7 @@ source(snakemake@params[["locus"]])
 lead <- fread(snakemake@input[["lead"]])
 
 if (nrow(lead) == 0) {
-  credset = data.frame(
+  credset <- data.frame(
     SNPID = character(),
     rsID = character(),
     LOCUS = character(),

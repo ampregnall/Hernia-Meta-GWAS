@@ -31,7 +31,7 @@ mr_hits <- vroom::vroom(mr_files, id = "Phenotype", show_col_types = FALSE) |>
   ungroup() |>
   filter(fdr < 0.05) |>
   mutate(Gene = str_split_i(exposure, ":", 4)) |>
-  distinct(Phenotype, Gene)   # only need unique pairs for coloc
+  distinct(Phenotype, Gene) # only need unique pairs for coloc
 
 # ---- pQTL file map ----
 pqtl_files <- list(
@@ -87,16 +87,18 @@ pqtl_files <- list(
 )
 
 # ---- Gene coordinates (join once) ----
-gene_location <- data.table::fread("data/meta/pops/utils/gene_annot.txt",
-                                   select = c("ENSGID","NAME","CHR","START","END","TSS"))
+gene_location <- data.table::fread(
+  "data/meta/pops/utils/gene_annot.txt",
+  select = c("ENSGID", "NAME", "CHR", "START", "END", "TSS")
+)
 
 gene_location_manual <- data.frame(
   ENSGID = c("ENSG00000187676", "ENSG00000175164", "ENSG00000255690"),
-  NAME   = c("B3GLCT", "ABO", "TRIL"),
-  CHR    = c(13, 9, 7),
-  START  = c(131199975, 133233278, 28992974),
-  END    = c(131332276, 133276024, 28997946),
-  TSS    = c(NA, NA, NA)
+  NAME = c("B3GLCT", "ABO", "TRIL"),
+  CHR = c(13, 9, 7),
+  START = c(131199975, 133233278, 28992974),
+  END = c(131332276, 133276024, 28997946),
+  TSS = c(NA, NA, NA)
 )
 
 genes <- bind_rows(gene_location, gene_location_manual) |>
@@ -112,86 +114,109 @@ pairs <- mr_hits |>
 .make_mats <- function(dt) {
   # dt columns: rsID, trait, BETA, SE
   dt <- dt[!is.na(rsID) & rsID != ""]
-  dt <- unique(dt, by = c("rsID","trait"))
-  
+  dt <- unique(dt, by = c("rsID", "trait"))
+
   betas <- dcast(dt, rsID ~ trait, value.var = "BETA")
-  ses   <- dcast(dt, rsID ~ trait, value.var = "SE")
-  
+  ses <- dcast(dt, rsID ~ trait, value.var = "SE")
+
   rb <- betas$rsID
   rs <- ses$rsID
   betas$rsID <- NULL
   ses$rsID <- NULL
-  
+
   betas <- as.matrix(betas)
-  ses   <- as.matrix(ses)
-  
+  ses <- as.matrix(ses)
+
   rownames(betas) <- rb
-  rownames(ses)   <- rs
-  
+  rownames(ses) <- rs
+
   # Keep only shared SNPs
   common <- intersect(rownames(betas), rownames(ses))
-  if (length(common) == 0) return(NULL)
-  
+  if (length(common) == 0) {
+    return(NULL)
+  }
+
   betas <- betas[common, , drop = FALSE]
-  ses   <- ses[common,   , drop = FALSE]
-  
+  ses <- ses[common, , drop = FALSE]
+
   # Remove rows with ANY NA in either matrix
   complete_rows <- complete.cases(betas) & complete.cases(ses)
-  
-  if (!any(complete_rows)) return(NULL)
-  
+
+  if (!any(complete_rows)) {
+    return(NULL)
+  }
+
   betas <- betas[complete_rows, , drop = FALSE]
-  ses   <- ses[complete_rows,   , drop = FALSE]
-  
+  ses <- ses[complete_rows, , drop = FALSE]
+
   list(
     betas = betas,
-    ses   = ses
+    ses = ses
   )
 }
 
 # ---- Coloc runner (NO break/next; returns NULL on skip) ----
 pqtl_colocalization <- function(Phenotype, Gene, CHR, START, END, pqtl_path) {
   message("Running HyPrColoc for: ", Phenotype, " / ", Gene)
-  
-  sum_path <- glue("data/processed/metal-formatted/{Phenotype}-ALL_metal_formatted.txt")
-  if (!file.exists(sum_path)) return(NULL)
-  if (!file.exists(pqtl_path)) return(NULL)
-  
+
+  sum_path <- glue(
+    "data/processed/metal-formatted/{Phenotype}-ALL_metal_formatted.txt"
+  )
+  if (!file.exists(sum_path)) {
+    return(NULL)
+  }
+  if (!file.exists(pqtl_path)) {
+    return(NULL)
+  }
+
   pad <- 250000L
-  lo  <- START - pad
-  hi  <- END + pad
-  
+  lo <- START - pad
+  hi <- END + pad
+
   # Read minimal columns only
-  sumstats <- data.table::fread(sum_path, select = c("CHR","POS","rsID","BETA","SE"))
-  pqtl     <- data.table::fread(pqtl_path, select = c("CHR","BP","SNP","BETA","SE"))
-  
+  sumstats <- data.table::fread(
+    sum_path,
+    select = c("CHR", "POS", "rsID", "BETA", "SE")
+  )
+  pqtl <- data.table::fread(
+    pqtl_path,
+    select = c("CHR", "BP", "SNP", "BETA", "SE")
+  )
+
   # Filter to locus + de-dup
   sum_locus <- sumstats[CHR == CHR & POS >= lo & POS <= hi]
-  if (nrow(sum_locus) == 0) return(NULL)
+  if (nrow(sum_locus) == 0) {
+    return(NULL)
+  }
   sum_locus[, trait := Phenotype]
-  sum_locus <- unique(sum_locus, by = c("rsID","trait"))
+  sum_locus <- unique(sum_locus, by = c("rsID", "trait"))
   sum_locus <- sum_locus[, .(rsID, trait, BETA, SE)]
-  
+
   pqtl_locus <- pqtl[CHR == CHR & BP >= lo & BP <= hi]
-  if (nrow(pqtl_locus) == 0) return(NULL)
+  if (nrow(pqtl_locus) == 0) {
+    return(NULL)
+  }
   pqtl_locus[, `:=`(rsID = SNP, trait = Gene)]
-  pqtl_locus <- unique(pqtl_locus, by = c("rsID","trait"))
+  pqtl_locus <- unique(pqtl_locus, by = c("rsID", "trait"))
   pqtl_locus <- pqtl_locus[, .(rsID, trait, BETA, SE)]
-  
+
   dt <- rbindlist(list(sum_locus, pqtl_locus), use.names = TRUE, fill = TRUE)
   mats <- .make_mats(dt)
-  if (is.null(mats)) return(NULL)
-  
+  if (is.null(mats)) {
+    return(NULL)
+  }
+
   # Need >= 2 traits and some SNPs
   #if (ncol(mats$betas) < 2 || nrow(mats$betas) < 10) return(NULL)
-  
+
   out <- hyprcoloc::hyprcoloc(
-    mats$betas, mats$ses,
+    mats$betas,
+    mats$ses,
     trait.names = colnames(mats$betas),
-    snp.id      = rownames(mats$betas)
+    snp.id = rownames(mats$betas)
   )
   message("HyPrColoc run succesfully for: ", Phenotype, " / ", Gene)
-  
+
   # Attach identifiers so you can trace results
   out$results$Phenotype <- Phenotype
   out$results$Gene <- Gene
@@ -199,13 +224,20 @@ pqtl_colocalization <- function(Phenotype, Gene, CHR, START, END, pqtl_path) {
 }
 
 # ---- Run across pairs safely ----
-pqtl_colocalization_safe <- purrr::possibly(pqtl_colocalization, otherwise = NULL)
+pqtl_colocalization_safe <- purrr::possibly(
+  pqtl_colocalization,
+  otherwise = NULL
+)
 
 res <- purrr::pmap(pairs, pqtl_colocalization_safe)
 results <- res |>
-  purrr::compact() |>     # remove NULLs
-  purrr::flatten() |>     # remove the extra list layer
-  purrr::list_rbind() 
+  purrr::compact() |> # remove NULLs
+  purrr::flatten() |> # remove the extra list layer
+  purrr::list_rbind()
 
 
-vroom::vroom_write(results, "data/processed/mendelian-randomization/MR_PQTL_colocalization.txt", delim = "\t")
+vroom::vroom_write(
+  results,
+  "data/processed/mendelian-randomization/MR_PQTL_colocalization.txt",
+  delim = "\t"
+)

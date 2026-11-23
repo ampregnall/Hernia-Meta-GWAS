@@ -43,12 +43,13 @@ if (study == "Pan-UKBB") {
 }
 
 df.formatted <- MungeSumstats::format_sumstats(
-  df, 
-  ref_genome = "GrCh38", 
+  df,
+  ref_genome = "GrCh38",
   dbSNP = 144,
-  bi_allelic_filter = FALSE, 
+  bi_allelic_filter = FALSE,
   allele_flip_frq = FALSE,
   return_data = TRUE,
-  return_format = "data.table")
+  return_format = "data.table"
+)
 
 fwrite(df.formatted, output, sep = "\t")

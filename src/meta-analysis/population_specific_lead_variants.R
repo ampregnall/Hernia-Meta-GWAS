@@ -32,11 +32,15 @@ process_lead_variants <- function(phenotype) {
   )
 
   noneur %>%
-    dplyr::mutate(SHARED = dplyr::case_when(
-      SNPID %in% eur$SNPID & SNPID %in% all$SNPID ~ "EUR & ALL",
-      SNPID %in% eur$SNPID ~ "EUR",
-      SNPID %in% all$SNPID ~ "ALL",
-      TRUE ~ "UNIQUE"), .after = POP)
+    dplyr::mutate(
+      SHARED = dplyr::case_when(
+        SNPID %in% eur$SNPID & SNPID %in% all$SNPID ~ "EUR & ALL",
+        SNPID %in% eur$SNPID ~ "EUR",
+        SNPID %in% all$SNPID ~ "ALL",
+        TRUE ~ "UNIQUE"
+      ),
+      .after = POP
+    )
 }
 
 population_specific <- purrr::map(phenotypes, process_lead_variants) %>%

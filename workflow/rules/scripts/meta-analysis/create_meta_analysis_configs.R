@@ -39,7 +39,10 @@ for (phenotype in phenotypes) {
       # Population-specific meta-analyses require >= 2 sumstats. Single-study EAS
       # sumstats are also passed through METAL so they share the same output format.
       # Must match the valid_pairs / metal_pairs logic in workflow/Snakefile.
-      if (length(study_files) >= 2 || (population == "EAS" && length(study_files) == 1)) {
+      if (
+        length(study_files) >= 2 ||
+          (population == "EAS" && length(study_files) == 1)
+      ) {
         write_metal_config(paste(phenotype, population, sep = "-"), study_files)
       }
     }

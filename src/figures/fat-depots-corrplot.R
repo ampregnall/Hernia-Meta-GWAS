@@ -1,4 +1,6 @@
-base::load("data/processed/genomic-sem/ldsc/GenomicSEM_hernia_adipose_traits.RData")
+base::load(
+  "data/processed/genomic-sem/ldsc/GenomicSEM_hernia_adipose_traits.RData"
+)
 
 trait.names <- c(
   "ASAT",
@@ -6,7 +8,7 @@ trait.names <- c(
   "ASATGFATRatio",
   "BMI",
   "Diaphragmatic",
-  "Femoral", 
+  "Femoral",
   "GFAT",
   "GFATAdjBMI",
   "Inguinal",
@@ -29,9 +31,9 @@ p1 <- ggcorrplot(R) +
 
 ggsave(
   filename = "figures/corrplots/hernia-fat-depots-corrplot.pdf",
-  plot = p1, 
-  width = 170, 
-  height = 170, 
+  plot = p1,
+  width = 170,
+  height = 170,
   units = "mm",
   dpi = 600
 )

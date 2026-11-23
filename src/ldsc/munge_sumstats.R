@@ -55,7 +55,7 @@ munge_sumstats <- function(
   )
 
   ##note that fread is not used here due to formatting differences across summary statistic files
-  files = list(sumstats_df)
+  files <- list(sumstats_df)
   cat(
     print("Reading in reference file"),
     file = log.file,

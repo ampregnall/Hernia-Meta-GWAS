@@ -20,9 +20,11 @@ lead = lead.select(["CHR", "POS"]).with_columns(
 df = df.join(lead, on="CHR", how="inner", suffix="_LEAD", coalesce=False)
 
 df = df.filter(
-    ((pl.col("CHR") == pl.col("CHR_LEAD"))
-    & (pl.col("POS") <= pl.col("END"))
-    & (pl.col("POS") >= pl.col("START")))
+    (
+        (pl.col("CHR") == pl.col("CHR_LEAD"))
+        & (pl.col("POS") <= pl.col("END"))
+        & (pl.col("POS") >= pl.col("START"))
+    )
     | (pl.col("P") < 0.00000005)
 )
 
@@ -51,4 +53,4 @@ sumstats = gl.Sumstats(
     z="Z",
 )
 
-sumstats.to_format(snakemake.params.vep_prefix, fmt="vep")  
+sumstats.to_format(snakemake.params.vep_prefix, fmt="vep")

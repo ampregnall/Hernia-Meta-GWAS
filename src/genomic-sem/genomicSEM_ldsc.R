@@ -5,7 +5,11 @@ library(psych)
 # -----------------------
 # Inputs
 # -----------------------
-sumstats <- list.files("data/processed/genomic-sem/munge", pattern = "\\.gz$", full.names = TRUE)
+sumstats <- list.files(
+  "data/processed/genomic-sem/munge",
+  pattern = "\\.gz$",
+  full.names = TRUE
+)
 
 trait.names <- c(
   "ASAT",
@@ -13,7 +17,7 @@ trait.names <- c(
   "ASATGFATRatio",
   "BMI",
   "Diaphragmatic",
-  "Femoral", 
+  "Femoral",
   "GFAT",
   "GFATAdjBMI",
   "Inguinal",
@@ -22,7 +26,8 @@ trait.names <- c(
   "VATAdjBMI",
   "VATASATRatio",
   "VATGFATRatio",
-  "Ventral")
+  "Ventral"
+)
 
 sample.prev <- c(
   NA,
@@ -41,28 +46,27 @@ sample.prev <- c(
   NA,
   0.50
 )
- 
+
 population.prev <- c(
   NA,
   NA,
   NA,
   NA,
-  0.00018, # Diaphragmatic 
-  0.008,   # Femoral
+  0.00018, # Diaphragmatic
+  0.008, # Femoral
   NA,
   NA,
-  0.04,    # Inguinal
-  0.03,    # Umbilical
+  0.04, # Inguinal
+  0.03, # Umbilical
   NA,
   NA,
   NA,
   NA,
   0.017
-  )   # Ventral
+) # Ventral
 
 
-
-ld  <- "/project/voltron/Resources/eur_w_ld_chr/"
+ld <- "/project/voltron/Resources/eur_w_ld_chr/"
 wld <- "/project/voltron/Resources/eur_w_ld_chr/"
 
 out_ldsc <- "data/processed/genomic-sem/ldsc/GenomicSEM_hernia_adipose_traits.RData"
@@ -82,7 +86,13 @@ ldsc_output <- GenomicSEM::ldsc(
 save(ldsc_output, file = out_ldsc)
 
 # Genetic covariance matrix for hernia subtypes
-hernia_traits <- c("Ventral", "Inguinal", "Umbilical", "Femoral", "Diaphragmatic")
+hernia_traits <- c(
+  "Ventral",
+  "Inguinal",
+  "Umbilical",
+  "Femoral",
+  "Diaphragmatic"
+)
 
 S <- ldsc_output$S
 colnames(S) <- rownames(S) <- trait.names
@@ -95,8 +105,8 @@ run_factanal <- function(S, nfactors, rotation, n.obs) {
   # factanal expects covmat as either a matrix or list(cov=..., n.obs=...)
   # and standardizes the covariance matrix internally
   fa <- stats::factanal(
-    covmat   = list(cov = S, n.obs = n.obs),
-    factors  = nfactors,
+    covmat = list(cov = S, n.obs = n.obs),
+    factors = nfactors,
     rotation = rotation
   )
   fa
@@ -108,7 +118,12 @@ efa_solutions <- list()
 for (k in 1:2) {
   for (rot in c("varimax", "promax")) {
     key <- paste0("k", k, "_", rot)
-    efa_solutions[[key]] <- run_factanal(S_hernia, nfactors = k, rotation = rot, n.obs = n_obs_efa)
+    efa_solutions[[key]] <- run_factanal(
+      S_hernia,
+      nfactors = k,
+      rotation = rot,
+      n.obs = n_obs_efa
+    )
     cat("\n====================\nEFA:", key, "\n====================\n")
     print(efa_solutions[[key]]$loadings)
   }
@@ -117,7 +132,8 @@ for (k in 1:2) {
 efa_loadings <- purrr::imap(efa_solutions, function(fa, key) {
   L <- unclass(fa$loadings)
   data.frame(model = key, trait = rownames(L), L, row.names = NULL)
-}) |> dplyr::bind_rows()
+}) |>
+  dplyr::bind_rows()
 
 fwrite(efa_loadings, "data/processed/genomic-sem/EFA_loadings.txt", sep = "\t")
 
@@ -170,8 +186,10 @@ fits <- purrr::map(models, function(model) {
   )
 })
 
-cfa_modelfit <- purrr::imap(fits, ~ data.frame(model = .y, .x$modelfit)) |> dplyr::bind_rows()
-cfa_results <- purrr::imap(fits, ~ data.frame(model = .y, .x$results)) |> dplyr::bind_rows()
+cfa_modelfit <- purrr::imap(fits, ~ data.frame(model = .y, .x$modelfit)) |>
+  dplyr::bind_rows()
+cfa_results <- purrr::imap(fits, ~ data.frame(model = .y, .x$results)) |>
+  dplyr::bind_rows()
 
 print(cfa_modelfit)
 
