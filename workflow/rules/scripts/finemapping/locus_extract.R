@@ -67,3 +67,27 @@ locus_extract_dtable <- function(sumstats_df,
   
   return(result)
 }
+
+locus_extract_coloc <- function(sumstats_df, # df containing summary statistics
+                          sumstats_chr_col = chromosome,
+                          sumstats_pos_col = position,
+                          locus_df, # df containing gws loci
+                          locus_chr_col = chromosome,
+                          locus_start_col = START_region,
+                          locus_end_col = END_region,
+                          locus_id_col = ID) {
+  
+  locus_df <- locus_df %>%
+    dplyr::select(chromosome = {{ locus_chr_col }}, start = {{ locus_start_col }}, 
+                  end = {{ locus_end_col }}, locus_marker = {{ locus_id_col }})
+  
+  sumstats_df <- sumstats_df %>%
+    dplyr::rename(chromosome = {{ sumstats_chr_col }}, position = {{ sumstats_pos_col }}) %>%
+    dplyr::mutate(chromosome = as.numeric(chromosome), position = as.numeric(position)) %>%
+    dplyr::inner_join(locus_df, by = "chromosome", relationship = "many-to-many") %>%
+    dplyr::filter(between(position, start, end)) %>%
+    dplyr::collect() %>%
+    dplyr::select(locus_marker, chromosome, everything())
+  
+  return(sumstats_df)
+}

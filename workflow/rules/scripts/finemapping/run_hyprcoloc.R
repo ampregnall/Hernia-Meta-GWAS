@@ -28,21 +28,37 @@ sumstats <- purrr::map(phenotypes, function(phenotype) {
 
 ### LOAD LEAD VARIANTS
 lead_vars <- purrr::map(phenotypes, function(phenotype) {
-  data.table::fread(glue::glue("data/processed/lead-variants/metal/{phenotype}-ALL_lead_variants.txt"))}) %>%
+  vroom::vroom(glue::glue("data/processed/lead-variants/metal/{phenotype}-ALL_lead_variants.txt")) %>%
+    dplyr::mutate(phenotype = phenotype)
+}) %>%
   dplyr::bind_rows() %>%
   dplyr::mutate(START = POS - 500000, END = POS + 500000) %>%
-  tidygenomics::genome_cluster(by=c("CHR", "START", "END"), max_distance = 0) %>% 
-  dplyr::slice_min(order_by = P, by=c("cluster_id"))
+  tidygenomics::genome_cluster(by=c("CHR", "START", "END"), max_distance = 0) %>%
+  dplyr::group_by(cluster_id) %>%
+  dplyr::summarise(
+    CHR = first(CHR),
+    START = min(START),
+    END = max(END), 
+    ID = glue::glue("{CHR}:{START}:{END}"),
+    NTRAITS = n_distinct(phenotype),
+    TRAITS = list(unique(phenotype))) %>%
+  dplyr::filter(NTRAITS > 1)
 
-# Extract all variants within 500 kb of lead variants
-sumstats_windowed <- locus_extract(sumstats,
-                          sumstats_chr_col = CHR, 
-                          sumstats_pos_col = POS, 
-                          locus_df = lead_vars,
-                          locus_chr_col = CHR,
-                          locus_pos_col = POS,
-                          locus_gene_col = GENE,
-                          locus_size = 1e6)
+sumstats_windowed <- purrr::map(1:nrow(lead_vars), function(i) {
+  
+  lead_vars <- lead_vars[i, ]
+  traits_to_include <- unlist(lead_vars$TRAITS)
+  
+  df <- sumstats %>% 
+    dplyr::filter(trait %in% traits_to_include) %>%
+    dplyr::filter(CHR == lead_vars$CHR) %>%
+    dplyr::filter(dplyr::between(POS, lead_vars$START, lead_vars$END)) %>%
+    dplyr::mutate(locus_marker = lead_vars$ID)
+  
+  return(df)
+
+}) %>% dplyr::bind_rows()
+
 
 # Run Coloc
 hyprcoloc_res <- sumstats_windowed %>%
@@ -103,24 +119,20 @@ credset <- hyprcoloc_res %>%
   unnest(credset) %>%
   dplyr::select(locus_marker, traits, rsID, PIP, credset_id) %>%
   dplyr::inner_join(sumstats_windowed %>% dplyr::select(
-    rsID, chromosome, position, EA, NEA, gene
+    rsID, CHR, POS, EA, NEA
   ) %>% dplyr::distinct(rsID, .keep_all = TRUE), by = "rsID") %>%
-  dplyr::mutate(locus_marker = stringr::str_replace(locus_marker, ":", "_")) %>%
-  dplyr::mutate(LOCUS_MARKER = glue::glue("{gene}_{locus_marker}")) %>%
   dplyr::rename(
     CS = credset_id,
-    CHR = chromosome,
-    POS = position,
-    GENE = gene,
-    TRAITS = traits
+    TRAITS = traits,
+    LOCUS_MARKER = locus_marker
   ) %>%
-  dplyr::select(LOCUS_MARKER, TRAITS, rsID, CHR, POS, EA, NEA, GENE, PIP, CS)
+  dplyr::select(LOCUS_MARKER, TRAITS, rsID, CHR, POS, EA, NEA, PIP, CS)
 
 # Save results
 fwrite(x = hyprcoloc_res_all, 
        file = snakemake@output[["colocalization"]],
        sep = "\t")
 
-fwrite(x = credset, 
+fwrite(x = credset,
        file = snakemake@output[["credset"]],
        sep = "\t")
