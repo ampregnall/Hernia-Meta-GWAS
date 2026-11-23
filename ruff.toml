@@ -1,0 +1,5 @@
+# Vendored from https://github.com/FinucaneLab/pops; kept identical to upstream
+extend-exclude = [
+    "workflow/rules/scripts/variant-annotation/pops.py",
+    "workflow/rules/scripts/variant-annotation/munge_feature_directory.py",
+]
