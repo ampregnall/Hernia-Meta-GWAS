@@ -1,26 +1,30 @@
+import sys
+
 import gwaslab as gl
 
+log = open(snakemake.log[0], "w")
+sys.stdout = sys.stderr = log
+
+# Formatted meta-analysis output (already passed basic_check in format_meta)
 ss = gl.Sumstats(
     snakemake.input[0],
-    snpid="MarkerName",
-    chrom="Chromosome",
-    pos="Position",
-    ea="Allele1",
-    nea="Allele2",
-    eaf="Freq1",
-    beta="Effect",
-    se="StdErr",
-    p="P-value",
-    ncase="NCASE",
-    ncontrol="NCONTROL",
-    n="SAMPLESIZE",
+    snpid="SNPID",
+    rsid="rsID",
+    chrom="CHR",
+    pos="POS",
+    ea="EA",
+    nea="NEA",
+    eaf="EAF",
+    beta="BETA",
+    se="SE",
+    p="P",
+    ncase="N_CASE",
+    ncontrol="N_CONTROL",
+    n="N",
     sep="\t",
     build="38",
     verbose=True,
 )
-
-# Perform basic check on sumstats
-ss.basic_check()
 
 # Extract lead vars
 lead_vars = ss.get_lead(anno=True)
