@@ -11,8 +11,3 @@ dependencies:
   - r-curl
   - r-jsonlite
   - pip
-  - bioconductor-rtracklayer
-  - bioconductor-genomicranges
-  - bioconductor-snplocs.hsapiens.dbsnp144.grch38
-  - bioconductor-bsgenome.hsapiens.ncbi.grch38
-  - bioconductor-mungesumstats

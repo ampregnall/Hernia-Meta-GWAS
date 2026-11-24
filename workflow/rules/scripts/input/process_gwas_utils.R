@@ -1,6 +1,17 @@
 # Load libraries
 library(magrittr)
 
+# Autosomes plus X. Y and MT are not analyzed.
+VALID_CHROMS <- c(as.character(1:22), "X")
+
+# Standardize chromosome labels across studies to 1-22 and "X". Studies code X as
+# "X", "chrX", or 23; numeric conversion would turn X into NA and drop it.
+standardise_chrom <- function(chrom) {
+  chrom <- toupper(sub("^chr", "", as.character(chrom), ignore.case = TRUE))
+  chrom[chrom == "23"] <- "X"
+  chrom
+}
+
 liftover_37_to_38 <- function(df, chr, pos, chainfile) {
   df <- df %>%
     dplyr::mutate("{{chr}}" := paste0("chr", {{ chr }})) %>%
@@ -19,7 +30,7 @@ process_bjp <- function(df, n_case, n_control) {
   df <- df %>%
     dplyr::select(!POS) %>% # Remove original POS column
     dplyr::mutate(
-      CHROM = as.numeric(stringr::str_replace(seqnames, "chr", ""))
+      CHROM = standardise_chrom(seqnames)
     ) %>%
     dplyr::mutate(N_CASE = n_case, N_CONTROL = n_control) %>%
     dplyr::mutate(N = N_CASE + N_CONTROL) %>%
@@ -44,6 +55,8 @@ process_bjp <- function(df, n_case, n_control) {
       N
     ) %>%
     tidyr::drop_na() %>%
+    dplyr::mutate(CHROM = standardise_chrom(CHROM)) %>%
+    dplyr::filter(CHROM %in% VALID_CHROMS) %>%
     dplyr::mutate(
       MARKER = glue::glue("{CHROM}:{POS}:{OTHER_ALLELE}:{EFFECT_ALLELE}")
     ) %>%
@@ -56,7 +69,7 @@ process_bjp <- function(df, n_case, n_control) {
 process_ukbb <- function(df, n_case, n_control) {
   df <- df %>%
     dplyr::mutate(
-      CHROM = as.numeric(stringr::str_replace(seqnames, "chr", ""))
+      CHROM = standardise_chrom(seqnames)
     ) %>%
     dplyr::mutate(N_CASE = n_case, N_CONTROL = n_control) %>%
     dplyr::mutate(N = N_CASE + N_CONTROL) %>%
@@ -84,6 +97,8 @@ process_ukbb <- function(df, n_case, n_control) {
       N
     ) %>%
     tidyr::drop_na() %>%
+    dplyr::mutate(CHROM = standardise_chrom(CHROM)) %>%
+    dplyr::filter(CHROM %in% VALID_CHROMS) %>%
     dplyr::mutate(
       MARKER = glue::glue("{CHROM}:{POS}:{OTHER_ALLELE}:{EFFECT_ALLELE}")
     ) %>%
@@ -118,6 +133,8 @@ process_mvp <- function(df, n_case, n_control) {
       N
     ) %>%
     tidyr::drop_na() %>%
+    dplyr::mutate(CHROM = standardise_chrom(CHROM)) %>%
+    dplyr::filter(CHROM %in% VALID_CHROMS) %>%
     dplyr::mutate(
       MARKER = glue::glue("{CHROM}:{POS}:{OTHER_ALLELE}:{EFFECT_ALLELE}")
     ) %>%
@@ -155,6 +172,8 @@ process_finngen <- function(df, n_case, n_control) {
       SE = sebeta,
       P = pval
     ) %>%
+    dplyr::mutate(CHROM = standardise_chrom(CHROM)) %>%
+    dplyr::filter(CHROM %in% VALID_CHROMS) %>%
     dplyr::mutate(
       MARKER = glue::glue("{CHROM}:{POS}:{OTHER_ALLELE}:{EFFECT_ALLELE}")
     ) %>%
@@ -168,7 +187,7 @@ process_aou <- function(df, n_case, n_control) {
   df <- df %>%
     dplyr::mutate(N_CASE = n_case, N_CONTROL = n_control) %>%
     dplyr::mutate(N = N_CASE + N_CONTROL) %>%
-    dplyr::mutate(CHROM = as.numeric(stringr::str_replace(CHR, "chr", ""))) %>%
+    dplyr::mutate(CHROM = standardise_chrom(CHR)) %>%
     dplyr::rename(
       EFFECT_ALLELE = Allele2,
       OTHER_ALLELE = Allele1,
@@ -189,6 +208,8 @@ process_aou <- function(df, n_case, n_control) {
       N
     ) %>%
     tidyr::drop_na() %>%
+    dplyr::mutate(CHROM = standardise_chrom(CHROM)) %>%
+    dplyr::filter(CHROM %in% VALID_CHROMS) %>%
     dplyr::mutate(
       MARKER = glue::glue("{CHROM}:{POS}:{OTHER_ALLELE}:{EFFECT_ALLELE}")
     ) %>%
