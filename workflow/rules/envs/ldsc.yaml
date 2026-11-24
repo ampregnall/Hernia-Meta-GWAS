@@ -1,0 +1,11 @@
+name: ldsc
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python=2.7.15
+  - ldsc=1.0.1
+  - pandas=0.20.3
+  - numpy=1.16.5
+  - scipy=1.2.1
+  - bitarray=1.2.1

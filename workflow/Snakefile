@@ -39,6 +39,11 @@ rule all:
             "data/processed/vep/output/{phenotype}-{population}.txt", valid_pairs
         ),
         "data/processed/finemapping/HyPrColoc_results.txt",
+        expand(
+            "data/processed/ldsc-seg/{phenotype}-{population}.cell_type_results.txt",
+            phenotype=downstream,
+            population=config["ldsc_seg"]["population"],
+        ),
         expand("data/processed/pops/{phenotype}.preds", phenotype=downstream),
         expand(
             "data/processed/variant-annotation/eqtl/{phenotype}_eqtl_colocalization.txt",

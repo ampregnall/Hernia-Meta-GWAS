@@ -45,6 +45,17 @@ downstream_phenotypes:
   - Umbilical
   - Femoral
 
+# Tissue and cell type enrichment of heritability (LDSC-SEG, ldsc.py --h2-cts).
+# LD scores are 1000 Genomes EUR, so the EUR meta-analysis is used.
+ldsc_seg:
+  population: "EUR"
+  # Annotation file: one line per tissue/cell type, "<name>\t<ld prefix>,<control prefix>".
+  # Prefixes are resolved relative to the repository root.
+  ldcts: "data/meta/ldsc-seg/tissues.ldcts"
+  baseline: "data/meta/ldsc-seg/1000G_EUR_Phase3_baseline/baseline."
+  weights: "data/meta/ldsc-seg/weights_hm3_no_hla/weights."
+  hm3_snplist: "data/meta/ldsc-seg/w_hm3.snplist"
+
 hyprcoloc:
   locus: "workflow/rules/scripts/finemapping/locus_extract.R"
   creds: "workflow/rules/scripts/finemapping/cred_sets.R"
