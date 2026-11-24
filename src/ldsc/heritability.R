@@ -2,7 +2,7 @@ library(ldscr)
 library(data.table)
 source("src/ldsc/munge_sumstats.R")
 
-input_dir <- "data/processed/metal-formatted"
+input_dir <- "data/processed/meta-formatted"
 output_dir <- "data/processed/sumstats-munged/"
 hm3 <- "data/meta/ldsc/w_hm3.snplist"
 
@@ -10,7 +10,7 @@ file_list <- grep(
   pattern = "Abdominal",
   x = list.files(
     input_dir,
-    pattern = "_metal_formatted.txt",
+    pattern = "_meta_formatted.txt",
     full.names = TRUE
   ),
   value = TRUE,
@@ -22,7 +22,7 @@ for (file in file_list) {
     dplyr::mutate(MAF = dplyr::if_else(EAF < 0.5, EAF, 1 - EAF)) |>
     dplyr::select(SNP = rsID, A1 = EA, A2 = NEA, MAF, BETA, P, N)
 
-  trait_name <- gsub("_metal_formatted.txt", "", basename(file))
+  trait_name <- gsub("_meta_formatted.txt", "", basename(file))
   munge_sumstats(
     data,
     hm3 = hm3,

@@ -12,7 +12,7 @@ library(dplyr)
 
 # Femoral hernia summary statistics are only available for EUR populations
 phenotypes <- c("Ventral", "Inguinal", "Umbilical", "Diaphragmatic")
-lead_dir <- "data/processed/lead-variants/metal"
+lead_dir <- "data/processed/lead-variants/meta"
 out_file <- "data/processed/lead-variants/population-specific/population_specific_lead_variants.txt"
 
 read_lead_variants <- function(phenotype, population) {

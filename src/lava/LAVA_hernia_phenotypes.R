@@ -57,19 +57,19 @@ convert_to_lava_format <- function(
 # ============================================================================
 
 ventral <- fread(
-  "data/processed/metal-formatted/Ventral-ALL_metal_formatted.txt"
+  "data/processed/meta-formatted/Ventral-ALL_meta_formatted.txt"
 )
 inguinal <- fread(
-  "data/processed/metal-formatted/Inguinal-ALL_metal_formatted.txt"
+  "data/processed/meta-formatted/Inguinal-ALL_meta_formatted.txt"
 )
 umbilical <- fread(
-  "data/processed/metal-formatted/Umbilical-ALL_metal_formatted.txt"
+  "data/processed/meta-formatted/Umbilical-ALL_meta_formatted.txt"
 )
 femoral <- fread(
-  "data/processed/metal-formatted/Femoral-ALL_metal_formatted.txt"
+  "data/processed/meta-formatted/Femoral-ALL_meta_formatted.txt"
 )
 diaphragmatic <- fread(
-  "data/processed/metal-formatted/Diaphragmatic-ALL_metal_formatted.txt"
+  "data/processed/meta-formatted/Diaphragmatic-ALL_meta_formatted.txt"
 )
 bmi <- fread("data/meta/lava/BMI_sumstats.txt.gz")
 bmi$N <- 806834
@@ -136,11 +136,11 @@ message("Input info file created: ", input_info_file)
 # ============================================================================
 
 locus_file <- vroom(c(
-  "data/processed/lead-variants/metal/Ventral-ALL_lead_variants.txt",
-  "data/processed/lead-variants/metal/Inguinal-ALL_lead_variants.txt",
-  "data/processed/lead-variants/metal/Umbilical-ALL_lead_variants.txt",
-  "data/processed/lead-variants/metal/Femoral-ALL_lead_variants.txt",
-  "data/processed/lead-variants/metal/Diaphragmatic-ALL_lead_variants.txt"
+  "data/processed/lead-variants/meta/Ventral-ALL_lead_variants.txt",
+  "data/processed/lead-variants/meta/Inguinal-ALL_lead_variants.txt",
+  "data/processed/lead-variants/meta/Umbilical-ALL_lead_variants.txt",
+  "data/processed/lead-variants/meta/Femoral-ALL_lead_variants.txt",
+  "data/processed/lead-variants/meta/Diaphragmatic-ALL_lead_variants.txt"
 )) |>
   mutate(
     START = POS - 500000,

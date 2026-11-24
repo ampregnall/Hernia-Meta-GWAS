@@ -160,7 +160,7 @@ pqtl_colocalization <- function(Phenotype, Gene, CHR, START, END, pqtl_path) {
   message("Running HyPrColoc for: ", Phenotype, " / ", Gene)
 
   sum_path <- glue(
-    "data/processed/metal-formatted/{Phenotype}-ALL_metal_formatted.txt"
+    "data/processed/meta-formatted/{Phenotype}-ALL_meta_formatted.txt"
   )
   if (!file.exists(sum_path)) {
     return(NULL)

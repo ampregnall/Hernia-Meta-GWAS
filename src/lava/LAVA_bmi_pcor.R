@@ -57,19 +57,19 @@ convert_to_lava_format <- function(
 # ============================================================================
 
 ventral <- fread(
-  "data/processed/metal-formatted/Ventral-ALL_metal_formatted.txt"
+  "data/processed/meta-formatted/Ventral-ALL_meta_formatted.txt"
 )
 inguinal <- fread(
-  "data/processed/metal-formatted/Inguinal-ALL_metal_formatted.txt"
+  "data/processed/meta-formatted/Inguinal-ALL_meta_formatted.txt"
 )
 umbilical <- fread(
-  "data/processed/metal-formatted/Umbilical-ALL_metal_formatted.txt"
+  "data/processed/meta-formatted/Umbilical-ALL_meta_formatted.txt"
 )
 femoral <- fread(
-  "data/processed/metal-formatted/Femoral-ALL_metal_formatted.txt"
+  "data/processed/meta-formatted/Femoral-ALL_meta_formatted.txt"
 )
 diaphragmatic <- fread(
-  "data/processed/metal-formatted/Diaphragmatic-ALL_metal_formatted.txt"
+  "data/processed/meta-formatted/Diaphragmatic-ALL_meta_formatted.txt"
 )
 bmi <- fread("data/meta/lava/BMI_sumstats.txt.gz")
 bmi$N <- 806834

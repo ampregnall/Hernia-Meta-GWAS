@@ -1,10 +1,10 @@
 # Load lead variants
 lead_files <- c(
-  "data/processed/lead-variants/metal/Ventral-ALL_lead_variants.txt",
-  "data/processed/lead-variants/metal/Inguinal-ALL_lead_variants.txt",
-  "data/processed/lead-variants/metal/Umbilical-ALL_lead_variants.txt",
-  "data/processed/lead-variants/metal/Femoral-ALL_lead_variants.txt",
-  "data/processed/lead-variants/metal/Diaphragmatic-ALL_lead_variants.txt"
+  "data/processed/lead-variants/meta/Ventral-ALL_lead_variants.txt",
+  "data/processed/lead-variants/meta/Inguinal-ALL_lead_variants.txt",
+  "data/processed/lead-variants/meta/Umbilical-ALL_lead_variants.txt",
+  "data/processed/lead-variants/meta/Femoral-ALL_lead_variants.txt",
+  "data/processed/lead-variants/meta/Diaphragmatic-ALL_lead_variants.txt"
 )
 
 lead_vars <- vroom::vroom(lead_files, id = "ID") |>

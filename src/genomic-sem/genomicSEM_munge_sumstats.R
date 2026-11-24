@@ -4,11 +4,11 @@ library(tidyverse)
 
 # List all METAL formatted files
 sumstats <- c(
-  "data/processed/metal-formatted/Ventral-EUR_metal_formatted.txt",
-  "data/processed/metal-formatted/Inguinal-EUR_metal_formatted.txt",
-  "data/processed/metal-formatted/Umbilical-EUR_metal_formatted.txt",
-  "data/processed/metal-formatted/Femoral-EUR_metal_formatted.txt",
-  "data/processed/metal-formatted/Diaphragmatic-EUR_metal_formatted.txt"
+  "data/processed/meta-formatted/Ventral-EUR_meta_formatted.txt",
+  "data/processed/meta-formatted/Inguinal-EUR_meta_formatted.txt",
+  "data/processed/meta-formatted/Umbilical-EUR_meta_formatted.txt",
+  "data/processed/meta-formatted/Femoral-EUR_meta_formatted.txt",
+  "data/processed/meta-formatted/Diaphragmatic-EUR_meta_formatted.txt"
 )
 
 # Process files.

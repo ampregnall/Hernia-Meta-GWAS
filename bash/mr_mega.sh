@@ -8,27 +8,41 @@
 #BSUB -N                             # Send email at job end
 
 # Multi-population meta-regression with MR-MEGA. Run after the Snakemake workflow,
-# which produces the MAF-filtered summary statistics used as input.
+# which produces the harmonized, MAC-filtered, LDSC-corrected summary statistics
+# (parquet) used as input. These are converted to text for MR-MEGA.
 # Requires a conda environment named "gwaslab" created from workflow/rules/envs/gwaslab.yaml:
 #   conda env create -f workflow/rules/envs/gwaslab.yaml
 
-cd /project/damrauer_wachtel/Hernia-Meta-GWAS
+# Submit from the repository root: bsub < bash/mr_mega.sh
+cd "${LS_SUBCWD:-$(pwd)}"
 
 module load MR-MEGA/0.2
 module load miniconda
 source activate gwaslab
 
 PHENOTYPES=(Abdominal Ventral Inguinal Diaphragmatic Umbilical Femoral)
-INPUT_DIR=data/processed/sumstats-maf-filtered
+PARQUET_DIR=data/processed/sumstats-ldsc-corrected
+INPUT_DIR=data/processed/mr-mega/input
 OUT_DIR=data/processed/mr-mega
 LEAD_DIR=data/processed/lead-variants/mr-mega
 FIG_DIR=results/mqq-plots/mr-mega
 
-mkdir -p ${OUT_DIR}/config ${LEAD_DIR} ${FIG_DIR}
+mkdir -p ${OUT_DIR}/config ${INPUT_DIR} ${LEAD_DIR} ${FIG_DIR}
+
+# Convert per-study parquet files to tab-delimited text
+python - "${PARQUET_DIR}" "${INPUT_DIR}" <<'PY'
+import sys
+from pathlib import Path
+import pandas as pd
+
+src, dst = Path(sys.argv[1]), Path(sys.argv[2])
+for f in sorted(src.glob("*.parquet")):
+    pd.read_parquet(f).to_csv(dst / f"{f.stem}.txt", sep="\t", index=False)
+PY
 
 for PHENOTYPE in "${PHENOTYPES[@]}"; do
     META=${PHENOTYPE}-ALL
-    ls -1 ${INPUT_DIR}/*_${PHENOTYPE}_*_LDSC.txt > ${OUT_DIR}/config/${META}.in
+    ls -1 ${INPUT_DIR}/*_${PHENOTYPE}_*.txt > ${OUT_DIR}/config/${META}.in
 
     # MR-MEGA requires more cohorts than PCs + 2; use the maximum number of PCs (K - 3)
     NUM_DATASETS=$(wc -l < ${OUT_DIR}/config/${META}.in)

@@ -14,7 +14,7 @@ mrinstrument <- as.data.frame(fread(
 # Load outcome data
 outcome <- TwoSampleMR::read_outcome_data(
   glue::glue(
-    "data/processed/metal-formatted/{phenotype}-ALL_metal_formatted.txt"
+    "data/processed/meta-formatted/{phenotype}-ALL_meta_formatted.txt"
   ),
   sep = "\t",
   snps = mrinstrument$rsID,

@@ -6,28 +6,28 @@ source("src/figures/gg_manhattan.R")
 
 # Load summary statistics
 ventral <- vroom::vroom(
-  "data/processed/metal-formatted/Ventral-ALL_metal_formatted.txt"
+  "data/processed/meta-formatted/Ventral-ALL_meta_formatted.txt"
 )
 inguinal <- vroom::vroom(
-  "data/processed/metal-formatted/Inguinal-ALL_metal_formatted.txt"
+  "data/processed/meta-formatted/Inguinal-ALL_meta_formatted.txt"
 )
 umbilical <- vroom::vroom(
-  "data/processed/metal-formatted/Umbilical-ALL_metal_formatted.txt"
+  "data/processed/meta-formatted/Umbilical-ALL_meta_formatted.txt"
 )
 femoral <- vroom::vroom(
-  "data/processed/metal-formatted/Femoral-ALL_metal_formatted.txt"
+  "data/processed/meta-formatted/Femoral-ALL_meta_formatted.txt"
 )
 diaphragmatic <- vroom::vroom(
-  "data/processed/metal-formatted/Diaphragmatic-ALL_metal_formatted.txt"
+  "data/processed/meta-formatted/Diaphragmatic-ALL_meta_formatted.txt"
 )
 
 # Load lead variants
 lead_files <- c(
-  "data/processed/lead-variants/metal/Ventral-ALL_lead_variants.txt",
-  "data/processed/lead-variants/metal/Inguinal-ALL_lead_variants.txt",
-  "data/processed/lead-variants/metal/Umbilical-ALL_lead_variants.txt",
-  "data/processed/lead-variants/metal/Femoral-ALL_lead_variants.txt",
-  "data/processed/lead-variants/metal/Diaphragmatic-ALL_lead_variants.txt"
+  "data/processed/lead-variants/meta/Ventral-ALL_lead_variants.txt",
+  "data/processed/lead-variants/meta/Inguinal-ALL_lead_variants.txt",
+  "data/processed/lead-variants/meta/Umbilical-ALL_lead_variants.txt",
+  "data/processed/lead-variants/meta/Femoral-ALL_lead_variants.txt",
+  "data/processed/lead-variants/meta/Diaphragmatic-ALL_lead_variants.txt"
 )
 
 lead_vars <- vroom::vroom(lead_files, id = "ID") |>
