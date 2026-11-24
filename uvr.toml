@@ -1,0 +1,8 @@
+[project]
+name = "Hernia-Meta-GWAS"
+
+[dependencies]
+Rcpp = "*"
+"data.table" = "*"
+jsonlite = "*"
+languageserver = "*"

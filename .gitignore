@@ -12,3 +12,5 @@ figures/**
 .RData
 # Manuscript drafts, reviewer correspondence, and archived exploratory code
 scratch/
+/.uvr/library/
+/.uvr/activate*
