@@ -1,3 +1,7 @@
+log <- file(snakemake@log[[1]], open = "wt")
+sink(log)
+sink(log, type = "message")
+
 library(data.table)
 library(tidyverse)
 
@@ -33,7 +37,7 @@ if (nrow(lead) == 0) {
     locus_chr_col = CHR,
     locus_pos_col = POS,
     locus_gene_col = GENE,
-    locus_size = 1e6
+    locus_size = snakemake@params[["locus_size"]]
   )
 
   credset <- calc_credset(
@@ -42,7 +46,7 @@ if (nrow(lead) == 0) {
     effect_col = BETA,
     se_col = SE,
     samplesize_col = N,
-    cred_interval = 0.99
+    cred_interval = snakemake@params[["credible_interval"]]
   )
 
   credset <- credset %>%

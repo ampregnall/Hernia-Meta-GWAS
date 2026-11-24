@@ -1,3 +1,7 @@
+log <- file(snakemake@log[[1]], open = "wt")
+sink(log)
+sink(log, type = "message")
+
 # Install hyprcoloc and dependencies if needed
 if (!requireNamespace("hyprcoloc", quietly = TRUE)) {
   # remotes::install_version("RcppEigen", version = "0.3.3.9.3")
@@ -21,23 +25,21 @@ source(creds)
 source(locus)
 
 ### LOAD SNAKEMAKE OBJECTS
-phenotypes <- snakemake@config$metal_format$phenotypes
+phenotypes <- snakemake@params[["phenotypes"]]
+sumstats_files <- snakemake@input[["sumstats"]]
+lead_files <- snakemake@input[["lead"]]
 
 ### LOAD SUMSTATS
-sumstats <- purrr::map(phenotypes, function(phenotype) {
-  data.table::fread(glue::glue(
-    "data/processed/metal-formatted/{phenotype}-ALL_metal_formatted.txt"
-  )) %>%
+sumstats <- purrr::map2(phenotypes, sumstats_files, function(phenotype, file) {
+  data.table::fread(file) %>%
     dplyr::mutate(trait = phenotype) %>%
     dplyr::select(trait, rsID, CHR, POS, BETA, SE, EA, NEA, P)
 }) %>%
   dplyr::bind_rows()
 
 ### LOAD LEAD VARIANTS
-lead_vars <- purrr::map(phenotypes, function(phenotype) {
-  vroom::vroom(glue::glue(
-    "data/processed/lead-variants/metal/{phenotype}-ALL_lead_variants.txt"
-  )) %>%
+lead_vars <- purrr::map2(phenotypes, lead_files, function(phenotype, file) {
+  vroom::vroom(file) %>%
     dplyr::mutate(phenotype = phenotype)
 }) %>%
   dplyr::bind_rows() %>%

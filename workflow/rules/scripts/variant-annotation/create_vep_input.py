@@ -1,7 +1,11 @@
+import sys
 from pathlib import Path
 import gwaslab as gl
 import pandas as pd
 import polars as pl
+
+log = open(snakemake.log[0], "w")
+sys.stdout = sys.stderr = log
 
 LOCUS_SIZE = 1_000_000
 

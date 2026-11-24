@@ -1,56 +1,47 @@
-rule identify_lead_variants_metal:
-    input:
-        "data/processed/metal/{phenotype}_metal-1.txt"
-    output:
-        lead_vars = "data/processed/lead-variants/metal/{phenotype}_lead_variants.txt",
-        fig = "results/mqq-plots/metal/{phenotype}_mqq_plot.png",
-    params:
-        rsid_tsv = config["ldsc_correction"]["rsid_tsv"],
-        rsid_vcf = config["ldsc_correction"]["rsid_vcf"]
-    conda:
-        "envs/gwaslab.yaml"
-    script:
-        "scripts/meta-analysis/lead_vars_mqq_metal.py"
-
-rule format_metal:
-    input:
-        "data/processed/metal/{phenotype}_metal-1.txt"
-    output:
-        sumstats = "data/processed/metal-formatted/{phenotype}_metal_formatted.txt"
-    params:
-        rsid_tsv = config["ldsc_correction"]["rsid_tsv"],
-        rsid_vcf = config["ldsc_correction"]["rsid_vcf"]
-    conda:
-        "envs/gwaslab.yaml"
-    threads: 4
-    script:
-        "scripts/finemapping/format_metal.py"
-
 rule run_hyprcoloc:
     input:
-        expand("data/processed/metal-formatted/{phenotype}-ALL_metal_formatted.txt", phenotype=config["metal_format"]["phenotypes"])
+        sumstats=expand(
+            "data/processed/meta-formatted/{phenotype}-ALL_meta_formatted.txt",
+            phenotype=downstream,
+        ),
+        lead=expand(
+            "data/processed/lead-variants/meta/{phenotype}-ALL_lead_variants.txt",
+            phenotype=downstream,
+        ),
     output:
-        colocalization = "data/processed/finemapping/HyPrColoc_results.txt",
-        credset = "data/processed/finemapping/HyPrColoc_finemapping.txt"
+        colocalization="data/processed/finemapping/HyPrColoc_results.txt",
+        credset="data/processed/finemapping/HyPrColoc_finemapping.txt",
+    log:
+        "logs/run_hyprcoloc.log",
+    benchmark:
+        "benchmarks/run_hyprcoloc.tsv"
+    params:
+        phenotypes=downstream,
+        creds=config["hyprcoloc"]["creds"],
+        locus=config["hyprcoloc"]["locus"],
     conda:
         "envs/hyprcoloc.yaml"
-    params:
-        creds = config["hyprcoloc"]["creds"],
-        locus = config["hyprcoloc"]["locus"]
     resources:
-        mem_mb = 120000
+        mem_mb=120000,
     script:
         "scripts/finemapping/run_hyprcoloc.R"
 
+
 rule bayesian_finemapping:
     input:
-        sumstats = "data/processed/metal-formatted/{phenotype}_metal_formatted.txt",
-        lead = "data/processed/lead-variants/metal/{phenotype}_lead_variants.txt"
+        sumstats="data/processed/meta-formatted/{phenotype}-{population}_meta_formatted.txt",
+        lead="data/processed/lead-variants/meta/{phenotype}-{population}_lead_variants.txt",
     output:
-        credset = "data/processed/finemapping/{phenotype}_bayesian_finemapping.txt"
+        credset="data/processed/finemapping/{phenotype}-{population}_bayesian_finemapping.txt",
+    log:
+        "logs/bayesian_finemapping/{phenotype}-{population}.log",
+    benchmark:
+        "benchmarks/bayesian_finemapping/{phenotype}-{population}.tsv"
     params:
-        creds = config["bayesian_finemapping"]["creds"],
-        locus = config["bayesian_finemapping"]["locus"]
+        creds=config["bayesian_finemapping"]["creds"],
+        locus=config["bayesian_finemapping"]["locus"],
+        credible_interval=config["bayesian_finemapping"]["credible_interval"],
+        locus_size=config["bayesian_finemapping"]["locus_size"],
     conda:
         "envs/common.yaml"
     script:

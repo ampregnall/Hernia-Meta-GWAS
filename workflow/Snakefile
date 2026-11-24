@@ -1,88 +1,46 @@
-# # --------------
-# # Configuration
-# # --------------
-from pathlib import Path
-import pandas as pd
-import yaml
+from snakemake.utils import min_version
+
+min_version("9.0")
+
 
 configfile: "config/config.yaml"
 
-# Load metadata
-df = pd.read_table("config/studies.txt")
-df["id"] = df.apply(lambda row: f"{row.study}_{row.phenotype}_{row.population}", axis=1)
-df["ldsc"] = df.apply(lambda row: f"data/meta/gwaslab-references/ldsc/{row.population}/UKBB.{row.population}", axis=1)
-metadata = {row.id: row._asdict() for row in df.itertuples(index=False)}
-ids = list(metadata.keys())
-id_to_phenotype = {row.id: row.phenotype for row in df.itertuples(index=False)}
 
-# Create input files for meta analysis
-sumstats_harmonized = df.apply(lambda x: f'data/processed/sumstats-harmonized/{x["study"]}_{x["phenotype"]}_{x["population"]}.txt', axis = 1).tolist()
-sumstats_ldsc = df.apply(lambda x: f'data/processed/sumstats-ldsc-corrected/{x["study"]}_{x["phenotype"]}_{x["population"]}_LDSC.txt', axis = 1).tolist()
-sumstats_maffil = df.apply(lambda x: f'data/processed/sumstats-maf-filtered/{x["study"]}_{x["phenotype"]}_{x["population"]}_LDSC.txt', axis = 1).tolist()
+wildcard_constraints:
+    id=r"[^/]+",
+    phenotype=r"[A-Za-z]+",
+    population=r"[A-Z]+",
 
-# Create config files for meta analysis
-phenotypes = config['create_meta_analysis_configs']['phenotypes']
-populations = config['create_meta_analysis_configs']['populations']
 
-# valid_pairs: multi-population (ALL) and population-specific meta-analyses with >=2 sumstats
-# metal_pairs: valid_pairs plus single-study EAS sumstats, which are passed through METAL
-#              so they share the same output format as the other analyses
-valid_pairs = []
-metal_pairs = []
-
-for phenotype in phenotypes:
-    valid_pairs.append((phenotype, "ALL"))
-    metal_pairs.append((phenotype, "ALL"))
-    for population in populations:
-        n_studies = len(df[(df["phenotype"] == phenotype) & (df["population"] == population)])
-        if n_studies >= 2:
-            valid_pairs.append((phenotype, population))
-            metal_pairs.append((phenotype, population))
-        elif population == "EAS" and n_studies == 1:
-            metal_pairs.append((phenotype, population))
-
-# use these for the rule
-metal_config = [f"data/processed/metal/{pheno}-{pop}_metal-config.txt" for pheno, pop in metal_pairs]
-metal_results = [f"data/processed/metal/{pheno}-{pop}_metal-1.txt" for pheno, pop in metal_pairs]
-metal_sumstats = [f"data/processed/metal-formatted/{pheno}-{pop}_metal_formatted.txt" for pheno, pop in metal_pairs]
-
-lead_vars_metal = [f"data/processed/lead-variants/metal/{pheno}-{pop}_lead_variants.txt" for pheno, pop in valid_pairs]
-mqq_metal = [f"results/mqq-plots/metal/{pheno}-{pop}_mqq_plot.png" for pheno, pop in valid_pairs]
-
-colocalization = "data/processed/finemapping/HyPrColoc_results.txt"
-credset = "data/processed/finemapping/HyPrColoc_finemapping.txt"
-
-bayesian_finemapping = [f"data/processed/finemapping/{pheno}-{pop}_bayesian_finemapping.txt" for pheno, pop in valid_pairs]
-magmaout = [f"data/processed/magma/{pheno}/{pheno}.genes.out" for pheno in config['metal_format']['phenotypes']]
-magmaraw = [f"data/processed/magma/{pheno}/{pheno}.genes.raw" for pheno in config['metal_format']['phenotypes']]
-pops = [f"data/processed/pops/{pheno}.preds" for pheno in config['metal_format']['phenotypes']]
-eqtl = [f"data/processed/variant-annotation/eqtl/{pheno}_eqtl_colocalization.txt" for pheno in config['metal_format']['phenotypes']]
-vep_input = [f"data/processed/vep/input/{pheno}-{pop}.vep" for pheno, pop in valid_pairs]
-vep_output = [f"data/processed/vep/output/{pheno}-{pop}.txt" for pheno, pop in valid_pairs]
-
-# Load rules
+include: "rules/common.smk"
 include: "rules/input.smk"
 include: "rules/ldsc.smk"
 include: "rules/meta.smk"
 include: "rules/finemapping.smk"
 include: "rules/annotation.smk"
 
+
 rule all:
     input:
-        sumstats_harmonized,
-        sumstats_ldsc,
-        sumstats_maffil,
-        metal_config,
-        metal_results,
-        metal_sumstats,
-        lead_vars_metal,
-        mqq_metal,
-        colocalization,
-        credset,
-        bayesian_finemapping,
-        magmaout,
-        magmaraw,
-        pops,
-        eqtl,
-        vep_input,
-        vep_output
+        "results/qc/variant_counts.tsv",
+        expand("data/processed/ldsc-stats/{id}.txt", id=ids),
+        pair_paths(
+            "data/processed/meta-formatted/{phenotype}-{population}_meta_formatted.txt",
+            meta_pairs,
+        ),
+        pair_paths(
+            "results/mqq-plots/meta/{phenotype}-{population}_mqq_plot.png", valid_pairs
+        ),
+        pair_paths(
+            "data/processed/finemapping/{phenotype}-{population}_bayesian_finemapping.txt",
+            valid_pairs,
+        ),
+        pair_paths(
+            "data/processed/vep/output/{phenotype}-{population}.txt", valid_pairs
+        ),
+        "data/processed/finemapping/HyPrColoc_results.txt",
+        expand("data/processed/pops/{phenotype}.preds", phenotype=downstream),
+        expand(
+            "data/processed/variant-annotation/eqtl/{phenotype}_eqtl_colocalization.txt",
+            phenotype=downstream,
+        ),

@@ -1,13 +1,25 @@
 process_gwas:
   utils: "workflow/rules/scripts/input/process_gwas_utils.R"
   chainfile: "data/meta/liftover/hg19ToHg38.over.chain"
+  # Local SNPlocs package tarball used by MungeSumstats for rsID lookup. The file
+  # name must contain the genome build ("GRCh38").
+  dbsnp_tarball: "data/meta/dbsnp/SNPlocs.Hsapiens.dbSNP155.GRCh38_0.99.24.tar.gz"
+  # MungeSumstats unpacks the dbSNP tarball into the job's temporary directory
+  tmpdir: "data/tmp"
 
-ldsc_correction:
-  rsid_tsv: "data/meta/gwaslab-references/assign-rsid/1kg_dbsnp151_hg38_auto.txt.gz"
-  rsid_vcf: "data/meta/gwaslab-references/assign-rsid/GCF_000001405.40.gz"
+# Pan-UK Biobank LD scores: {ldsc_scores}/{population}/UKBB.{population}
+ldsc_scores: "data/meta/gwaslab-references/ldsc"
 
-create_meta_analysis_configs:
-  utils: "workflow/rules/scripts/meta-analysis/metal_config.R"
+# Applied after LDSC correction, so the intercept is estimated before rare variants
+# are removed. Keeps variants with expected minor allele count in cases > min_case_mac,
+# i.e. MAF > min_case_mac / (2 * N_CASE)
+mac_filter:
+  min_case_mac: 50
+
+meta_analysis:
+  trait_type: "binary"
+  # 23 = X
+  chromosomes: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
   phenotypes:
     - Abdominal
     - Ventral
@@ -24,14 +36,15 @@ create_meta_analysis_configs:
     - MID
     - AMR
 
-metal_format:
-  phenotypes:
-    - Ventral
-    - Inguinal
-    - Diaphragmatic
-    - Umbilical
-    - Femoral
-  
+# Hernia subtypes carried forward to finemapping, colocalization, and gene
+# prioritization. Abdominal is meta-analyzed but not carried forward.
+downstream_phenotypes:
+  - Ventral
+  - Inguinal
+  - Diaphragmatic
+  - Umbilical
+  - Femoral
+
 hyprcoloc:
   locus: "workflow/rules/scripts/finemapping/locus_extract.R"
   creds: "workflow/rules/scripts/finemapping/cred_sets.R"
@@ -39,3 +52,31 @@ hyprcoloc:
 bayesian_finemapping:
   creds: "workflow/rules/scripts/finemapping/calculate_bayes_factor_credible_sets.R"
   locus: "workflow/rules/scripts/finemapping/locus_extract.R"
+  credible_interval: 0.99
+  locus_size: 1000000
+
+magma:
+  bfile: "data/meta/magma/1000G_all_hg38"
+  gene_annot: "data/meta/magma/GRCh38.genes.ensg.genes.annot"
+
+pops:
+  gene_annot: "data/meta/pops/utils/gene_annot.txt"
+  control_features: "data/meta/pops/utils/features_control.txt"
+  feature_mat_prefix: "data/meta/pops/features-munged/features-munged"
+  num_feature_chunks: 115
+
+eqtl:
+  # eQTL Catalogue QTD000216 (fibroblasts)
+  sumstats: "data/meta/eqtl/QTD000216.all.tsv"
+  # Minimum number of variants shared between an eQTL gene and the GWAS locus
+  min_overlap: 50
+
+vep:
+  container: "/appl/containers/vep113.sif"
+  cache_dir: "/static/vepcache113"
+  bind: "/lsf,/project/,/appl/,/scratch/,/static"
+
+# Environment modules (requires --use-envmodules)
+modules:
+  magma: "magma/1.07a"
+  apptainer: "apptainer"

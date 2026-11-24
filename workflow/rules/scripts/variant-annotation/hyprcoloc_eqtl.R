@@ -1,3 +1,7 @@
+log <- file(snakemake@log[[1]], open = "wt")
+sink(log)
+sink(log, type = "message")
+
 # Install hyprcoloc and dependencies if needed
 if (!requireNamespace("hyprcoloc", quietly = TRUE)) {
   # remotes::install_version("RcppEigen", version = "0.3.3.9.3")
@@ -19,7 +23,7 @@ locus <- snakemake@params[["locus"]]
 source(locus)
 
 ### LOAD SNAKEMAKE OBJECTS
-eqtl <- snakemake@params[["eqtl"]]
+eqtl <- snakemake@input[["eqtl"]]
 sumstats <- snakemake@input[["sumstats"]]
 lead <- snakemake@input[["lead"]]
 phenotype <- stringr::str_split_i(basename(sumstats), "-", 1) # Extract phenotype from filename
@@ -42,7 +46,8 @@ eqtl <- eqtl %>%
     NEA = ref,
     P = pvalue
   ) %>%
-  dplyr::filter(CHR != "X") %>%
+  dplyr::mutate(CHR = dplyr::if_else(CHR == "X", "23", as.character(CHR))) %>%
+  dplyr::filter(CHR %in% as.character(1:23)) %>%
   dplyr::mutate(CHR = as.integer(CHR))
 
 ### Load sumstats
