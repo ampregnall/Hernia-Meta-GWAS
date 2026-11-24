@@ -7,9 +7,8 @@
 #BSUB -W 24:00                       # Runtime limit (hh:mm)
 #BSUB -N                             # Send email at job end
 
-module load miniconda
-source activate snakemake2
+# Submit from the repository root: bsub < bash/snakemake.sh
+# Snakemake and the LSF executor plugin are installed by pixi (pixi.toml).
+cd "${LS_SUBCWD:-$(pwd)}"
 
-cd /project/damrauer_wachtel/Hernia-Meta-GWAS 
-
-snakemake --use-conda --profile profile/default --rerun-triggers mtime
+pixi run workflow

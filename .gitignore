@@ -2,6 +2,8 @@ results/**
 resources/**
 documents/** 
 logs/**
+benchmarks/**
+.pixi/
 data/**
 .snakemake
 .snakemake/**

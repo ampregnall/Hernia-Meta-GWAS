@@ -1,0 +1,18 @@
+[workspace]
+name = "hernia-meta-gwas"
+description = "Snakemake workflow for the hernia meta-GWAS"
+channels = ["conda-forge", "bioconda"]
+platforms = ["linux-64", "osx-arm64"]
+
+[dependencies]
+python = "3.12.*"
+snakemake = ">=9.20,<10"
+snakemake-executor-plugin-lsf = ">=0.3.3,<0.4"
+# Snakemake creates the per-rule environments in workflow/rules/envs with conda
+conda = ">=24.7.1"
+
+[tasks]
+# Run on the LSF cluster (environment modules are loaded by the rules that need them)
+workflow = "snakemake --profile profile/default"
+dry-run = "snakemake --profile profile/default --dry-run"
+lint = "snakemake --lint"

@@ -1,5 +1,9 @@
 executor: lsf
 jobs: 100
+software-deployment-method:
+  - conda
+  - env-modules
+printshellcmds: true
 default-resources:
   lsf_queue: voltron_normal
   lsf_project: Hernia-Meta-GWAS
