@@ -14,3 +14,4 @@ figures/**
 scratch/
 /.uvr/library/
 /.uvr/activate*
+.vscode
