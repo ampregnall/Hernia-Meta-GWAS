@@ -17,8 +17,12 @@ One row per input set of summary statistics. Each row must have a matching file 
 
 | Key | Description |
 |---|---|
-| `process_gwas` | Helper functions and liftover chain file for summary statistic cleaning |
-| `ldsc_correction` | dbSNP reference files used by gwaslab to assign rsIDs |
-| `create_meta_analysis_configs` | Phenotypes and populations to meta-analyze. A population-specific meta-analysis is run when at least two studies are available for that phenotype and population |
-| `metal_format` | Hernia subtypes carried forward to finemapping, colocalization, and gene prioritization |
-| `hyprcoloc`, `bayesian_finemapping` | Helper functions for colocalization and finemapping |
+| `process_gwas` | Cleaning helpers, liftover chain file, dbSNP SNPlocs tarball for MungeSumstats, and temporary directory for unpacking the tarball |
+| `ldsc_scores` | Directory of Pan-UK Biobank LD scores (`{population}/UKBB.{population}`) for LDSC intercept correction |
+| `mac_filter` | Minimum expected minor allele count in cases, applied after LDSC correction |
+| `meta_analysis` | Trait type, chromosomes (23 = X), and phenotypes and populations to meta-analyze. A population-specific meta-analysis is run when at least two studies are available for that phenotype and population |
+| `downstream_phenotypes` | Hernia subtypes carried forward to finemapping, colocalization, gene prioritization, and LDSC-SEG |
+| `ldsc_seg` | Population, annotation file, baseline LD scores, weights, and HapMap3 SNP list for tissue and cell type enrichment |
+| `hyprcoloc`, `bayesian_finemapping` | Helper functions and parameters for colocalization and finemapping |
+| `magma`, `pops`, `eqtl`, `vep` | Reference data and parameters for gene prioritization |
+| `modules` | Environment modules loaded by rules (MAGMA, Apptainer) |

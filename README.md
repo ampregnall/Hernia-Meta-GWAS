@@ -11,13 +11,15 @@ We performed multi-population genome-wide association meta-analyses of five hern
 ├── config/
 │   ├── config.yaml          # Workflow parameters and helper script paths
 │   └── studies.txt          # Input summary statistics: study, phenotype, population, genome build, cases, controls
+├── pixi.toml, pixi.lock     # Snakemake and the LSF executor plugin (run with pixi)
 ├── profile/default/         # Snakemake profile for the LSF cluster
 ├── workflow/                # Snakemake workflow: harmonization through meta-analysis and annotation
 │   ├── Snakefile
 │   └── rules/
-│       ├── input.smk        # Summary statistic cleaning, liftover, and harmonization (MungeSumstats)
-│       ├── ldsc.smk         # LDSC intercept correction (gwaslab)
-│       ├── meta.smk         # MAF filter and METAL meta-analysis
+│       ├── common.smk       # Study metadata and meta-analysis definitions
+│       ├── input.smk        # Cleaning, liftover, and harmonization (MungeSumstats)
+│       ├── ldsc.smk         # LDSC intercept correction (gwaslab) and minor allele count filter; LDSC-SEG
+│       ├── meta.smk         # Fixed-effects IVW meta-analysis, formatting, lead variants
 │       ├── finemapping.smk  # Lead variants, Bayes factor finemapping, multi-trait colocalization (HyPrColoc)
 │       ├── annotation.smk   # MAGMA, PoPS, eQTL colocalization, Ensembl VEP
 │       ├── envs/            # Conda environments
@@ -42,8 +44,9 @@ We performed multi-population genome-wide association meta-analyses of five hern
 
 | Analysis | Code | Manuscript |
 |---|---|---|
-| Harmonization, LDSC correction, MAF filter | `workflow/rules/input.smk`, `ldsc.smk`, `meta.smk` | Methods: Genome-wide association meta-analysis |
-| Fixed-effects meta-analysis (METAL) | `workflow/rules/meta.smk` | Fig. 2 |
+| Harmonization, LDSC correction, minor allele count filter | `workflow/rules/input.smk`, `ldsc.smk` | Methods: Genome-wide association meta-analysis |
+| Variant counts removed at each QC step | `results/qc/variant_counts.tsv` (`workflow/rules/input.smk`) | Methods: Genome-wide association meta-analysis |
+| Fixed-effects IVW meta-analysis, autosomes and chrX | `workflow/rules/meta.smk` | Fig. 2 |
 | Multi-population meta-regression (MR-MEGA) | `bash/mr_mega.sh`, `src/mr-mega/` | Supplementary Fig. 3 |
 | Lead variants and shared loci | `workflow/rules/finemapping.smk`, `src/figures/lead_loci_upset.R` | Supplementary Fig. 1 |
 | Population-specific lead variants | `src/meta-analysis/population_specific_lead_variants.R` | Supplementary Fig. 2 |
@@ -51,6 +54,7 @@ We performed multi-population genome-wide association meta-analyses of five hern
 | Multi-trait colocalization | `workflow/rules/finemapping.smk` | Fig. 4 |
 | Variant-to-gene prioritization (VEP, eQTL colocalization, PoPS) | `workflow/rules/annotation.smk`, `src/gene-prioritization/` | Fig. 3 |
 | SNP heritability | `src/ldsc/` | Supplementary Fig. 4 |
+| Tissue and cell type heritability enrichment (LDSC-SEG, EUR) | `workflow/rules/ldsc.smk` | |
 | Genetic correlation and Genomic-SEM | `src/genomic-sem/` | Figs. 4 and 5 |
 | Local genetic correlation (LAVA) | `src/lava/` | Fig. 4 |
 | Mendelian randomization | `src/mendelian-randomization/` | Figs. 6 and 7 |
@@ -59,22 +63,36 @@ We performed multi-population genome-wide association meta-analyses of five hern
 
 ### Requirements
 
-The workflow was developed for an LSF high-performance computing cluster and uses [Snakemake](https://snakemake.readthedocs.io) (≥ 8, with the LSF executor plugin) and conda. Some rules load software through environment modules (METAL, MAGMA, MR-MEGA, Apptainer for VEP). Cluster-specific settings and paths are in `profile/default/config.yaml`, `bash/`, and the `shell` blocks of the workflow rules, and will need to be adapted for other systems.
+The workflow was developed for an LSF high-performance computing cluster. [Snakemake](https://snakemake.readthedocs.io) (9.x) and the LSF executor plugin are installed with [pixi](https://pixi.sh) from `pixi.toml`, with exact versions recorded in `pixi.lock`. Snakemake creates a conda environment for each rule from `workflow/rules/envs/`. MAGMA and Apptainer (for VEP) are loaded as environment modules; module names, the VEP container, and reference data paths are set in `config/config.yaml`. Cluster settings are in `profile/default/config.yaml`.
 
 Input summary statistics and reference data are expected in `data/`, which is not tracked in this repository:
 
 - `data/raw/sumstats/`: input summary statistics named `{study}_{phenotype}_{population}.txt`, matching `config/studies.txt`
-- `data/meta/`: reference data, including the hg19-to-hg38 liftover chain file, dbSNP rsID references, Pan-UK Biobank LD scores, MAGMA and PoPS reference files, eQTL Catalogue fibroblast eQTLs, the LAVA reference panel, and Mendelian randomization instruments
+- `data/meta/dbsnp/`: the dbSNP SNPlocs package tarball used by MungeSumstats for rsID lookup (see below)
+- `data/meta/ldsc-seg/`: LDSC-SEG annotation file (`.ldcts`), 1000 Genomes EUR baseline LD scores, regression weights, and HapMap3 SNP list
+- `data/meta/`: other reference data, including the hg19-to-hg38 liftover chain file, dbSNP rsID references, Pan-UK Biobank LD scores, MAGMA and PoPS reference files, eQTL Catalogue fibroblast eQTLs, the LAVA reference panel, and Mendelian randomization instruments
 
 ### Meta-analysis workflow
 
 ```bash
+# Install Snakemake (once)
+pixi install
+
+# Check the job graph without running anything
+pixi run dry-run
+
 # Submit the workflow to LSF
 bsub < bash/snakemake.sh
 
 # Or run directly from the repository root
-snakemake --use-conda --profile profile/default
+pixi run workflow
 ```
+
+#### dbSNP reference
+
+| File | Source | SHA-256 |
+|---|---|---|
+| `SNPlocs.Hsapiens.dbSNP155.GRCh38_0.99.24.tar.gz` | To be added | To be added |
 
 ### Downstream analyses
 
@@ -111,10 +129,13 @@ Meta-analysis summary statistics for ventral, inguinal, umbilical, femoral, diap
 
 | Software | Version |
 |---|---|
-| R | 4.3 |
-| MungeSumstats | Bioconductor |
+| Snakemake | 9.27.2 |
+| R | 4.5.3 (harmonization, meta-analysis); 4.3 (finemapping) |
+| MungeSumstats | 1.18.1 |
+| dbSNP (rsID harmonization) | 155 |
 | gwaslab | 3.6.3 |
-| METAL | 2020-05-05 |
+| Meta-analysis | Fixed-effects IVW ([nf-meta-gwas](https://github.com/ampregnall/nf-meta-gwas)), R arrow 25.0.1 |
+| LDSC | 1.0.1 |
 | MR-MEGA | 0.2 |
 | HyPrColoc | 0.0.2 |
 | MAGMA | 1.07a |
